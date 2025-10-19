@@ -4,6 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 from . import models
+from . import poc_models
 
 
 class UserCreationForm(forms.ModelForm):
@@ -159,3 +160,62 @@ admin.site.register(models.NotificationLog)
 admin.site.register(models.AuditLog)
 admin.site.register(models.CasePermission)
 admin.site.register(models.RetrievalRun)
+
+
+@admin.register(poc_models.PocCourt)
+class PocCourtAdmin(admin.ModelAdmin):
+    list_display = ("code", "name")
+    search_fields = ("code", "name")
+    ordering = ("code",)
+
+
+@admin.register(poc_models.PocRuleNode)
+class PocRuleNodeAdmin(admin.ModelAdmin):
+    list_display = ("rule_code", "node_type", "court", "heading")
+    list_filter = ("node_type", "court")
+    search_fields = ("rule_code", "heading", "text")
+    autocomplete_fields = ("court", "parent")
+    ordering = ("court", "rule_code", "ordinal")
+
+
+@admin.register(poc_models.PocJudge)
+class PocJudgeAdmin(admin.ModelAdmin):
+    list_display = ("display_name", "court", "role", "courtroom")
+    list_filter = ("court",)
+    search_fields = ("display_name", "role", "court__name")
+    autocomplete_fields = ("court",)
+    ordering = ("display_name",)
+
+
+@admin.register(poc_models.PocJudgeProcNode)
+class PocJudgeProcNodeAdmin(admin.ModelAdmin):
+    list_display = ("judge", "node_type", "heading", "ordinal")
+    list_filter = ("node_type", "judge")
+    search_fields = ("heading", "text", "judge__display_name")
+    autocomplete_fields = ("judge", "parent")
+    ordering = ("judge", "ordinal")
+
+
+@admin.register(poc_models.PocRequirement)
+class PocRequirementAdmin(admin.ModelAdmin):
+    list_display = ("requirement_type", "source_type", "source_id", "confidence_score")
+    list_filter = ("requirement_type", "source_type")
+    search_fields = ("requirement_text",)
+    ordering = ("requirement_type", "source_type")
+
+
+@admin.register(poc_models.PocComplianceCheck)
+class PocComplianceCheckAdmin(admin.ModelAdmin):
+    list_display = ("id", "check_date", "court_code", "judge", "overall_status")
+    list_filter = ("overall_status", "court_code", "check_date")
+    search_fields = ("court_code", "case_metadata")
+    autocomplete_fields = ("judge",)
+    ordering = ("-check_date",)
+
+
+@admin.register(poc_models.PocChangeEvent)
+class PocChangeEventAdmin(admin.ModelAdmin):
+    list_display = ("id", "entity_kind", "entity_id", "change_type", "detected_at")
+    list_filter = ("entity_kind", "change_type")
+    search_fields = ("entity_kind", "entity_id", "diff_text")
+    ordering = ("-detected_at",)

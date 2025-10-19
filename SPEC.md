@@ -41,8 +41,8 @@ The main goal was to provide:
 
 ### Backend
 - **Framework**: Django + Django REST Framework (DRF)
-- **Authentication**: Token‑based (Simple JWT)
-- **Database**: SQLite (dev)
+- **Authentication**: Token-based (Simple JWT)
+- **Database**: PostgreSQL (local dev + import of ILND demo dataset)
 - **Endpoints**:
   - `/api/v1/auth/token/` – Login
   - `/api/v1/deadlines/` – List, create, update deadlines
@@ -108,19 +108,27 @@ The main goal was to provide:
 - ✅ Authored `.env.production.example` and documented deployment workflow in `DEPLOYMENT.md`.
 - ✅ Validated production docker-compose stack end-to-end (build, up, migrate, seed, smoke test prep).
 - ✅ Added manual smoke-test checklist covering dashboard, deadlines, reminders, and system resiliency.
-- ⚠️ Discovered production React runtime mismatch (duplicate React instance causing `useState` dispatcher failure); instrumented build with debug logging and tightened Vite aliases for single-module resolution.
+- ✅ Resolved production React runtime mismatch (duplicate React instance caused `useState` dispatcher failure) by removing the legacy bundle from the build path and stubbing `lucide-react` dependencies; confirmed clean preview build.
+- ✅ Integrated Illinois Northern District (ILND) Rules POC schema: created unmanaged Django ORM models mapping to imported tables, pointed `INSTALLED_APPS` at `CourtRulesConfig`, and switched settings to PostgreSQL.
+- ✅ Imported ILND demo dataset via `schema.sql` + `demo_data.sql` and verified availability through Django ORM counts.
+- ✅ Registered ILND models in the Django admin and exposed read-only DRF endpoints under `/api/v1/ilnd/*` (courts, rule nodes, judges, judge procedures, requirements, compliance checks, change events); validated token auth with `curl` using demo credentials.
 
 ### Next Steps
 - 🚀 Promote containers to managed staging/production environment (ECS/Kubernetes/Fly/etc.) using GHCR images.
 - 🔐 Wire secrets management for production (`DJANGO_SECRET_KEY`, Postgres/Redis creds, JWT lifetimes) via cloud vault or hosting env vars.
 - 📈 Introduce monitoring/alerting (app logs, uptime checks, DB metrics) and finalize backup cadence for Postgres.
 - 🤝 Execute PRD follow-ups: architecture review, advisory board kickoff, pilot firm onboarding, and funding conversations.
-- 🛠️ Resolve React hook dispatcher error in production bundle before user validation; verify single React runtime, rerun smoke tests once UI renders.
+- 📦 Document ILND admin/endpoint workflows for the broader team and decide how/if to surface them in the main UI.
+- 🤖 Wire up `claude_extractor.py` as a Django service and expose compliance/requirement extraction endpoints; add tests around the workflow.
+- 🧪 Run end-to-end smoke tests (backend + legacy frontend) against the single React bundle to confirm no regressions.
+- 🎨 Preserve the legacy React UI as the primary frontend; keep the fresh Vite scaffold checked in for future experiments but out of the production build pipeline.
 
-### Session Progress – 2025-10-05
-- Rebuilt frontend/backend containers and confirmed production compose stack boots cleanly with Postgres/Redis.
-- Added diagnostic logging to `main.tsx`, `AuthProvider`, and `ThemeProvider` plus Vite alias dedupe to hunt duplicate React module loading.
-- Verified latest bundle hashes (`index-f5UNteJS.js`) served by Nginx; ongoing debugging of `useState` dispatcher failure blocking UI render.
+### Session Progress – 2025-10-17
+- Identified duplicate React runtime by inspecting Vite build artifacts; removed the stale `frontend/` directory and added temporary icon stubs to eliminate second React copy.
+- Scaffolded `frontend-new/` from Vite for controlled testing while retaining the legacy UI as the production entry point.
+- Adopted PostgreSQL locally, configured credentials in `config/settings/base.py`, and updated `CourtRulesConfig` to load ILND POC models on app ready.
+- Imported ILND demo schema/data, linked unmanaged models to raw tables (`db_table`), and validated row counts via Django shell.
+- Added admin registrations + DRF serializers/viewsets for ILND data, routed `/api/v1/ilnd/*`, and verified token retrieval with `curl`.
 
 ---
 

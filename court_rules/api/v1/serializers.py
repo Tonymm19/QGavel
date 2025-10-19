@@ -10,6 +10,15 @@ from court_rules.models import (
     AuditLog,
     User,
 )
+from court_rules.poc_models import (
+    PocChangeEvent,
+    PocComplianceCheck,
+    PocCourt,
+    PocJudge,
+    PocJudgeProcNode,
+    PocRequirement,
+    PocRuleNode,
+)
 
 
 class JudgeSerializer(serializers.ModelSerializer):
@@ -261,4 +270,138 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'full_name', 'email', 'role']
+        read_only_fields = fields
+
+
+class PocCourtSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PocCourt
+        fields = ['code', 'name', 'url']
+        read_only_fields = fields
+
+
+class PocRuleNodeSerializer(serializers.ModelSerializer):
+    court_code = serializers.CharField(source='court.code', read_only=True)
+    court_name = serializers.CharField(source='court.name', read_only=True)
+
+    class Meta:
+        model = PocRuleNode
+        fields = [
+            'id',
+            'court',
+            'court_code',
+            'court_name',
+            'rule_code',
+            'node_type',
+            'parent',
+            'ordinal',
+            'heading',
+            'text',
+            'source_url',
+            'normalized_text_hash',
+            'effective_from',
+            'effective_to',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = fields
+
+
+class PocJudgeSerializer(serializers.ModelSerializer):
+    court_code = serializers.CharField(source='court.code', read_only=True)
+    court_name = serializers.CharField(source='court.name', read_only=True)
+
+    class Meta:
+        model = PocJudge
+        fields = [
+            'id',
+            'court',
+            'court_code',
+            'court_name',
+            'display_name',
+            'role',
+            'courtroom',
+            'chambers',
+            'phone',
+            'fax',
+            'email',
+            'created_at',
+        ]
+        read_only_fields = fields
+
+
+class PocJudgeProcNodeSerializer(serializers.ModelSerializer):
+    judge_name = serializers.CharField(source='judge.display_name', read_only=True)
+
+    class Meta:
+        model = PocJudgeProcNode
+        fields = [
+            'id',
+            'judge',
+            'judge_name',
+            'node_type',
+            'parent',
+            'ordinal',
+            'heading',
+            'text',
+            'source_url',
+            'normalized_text_hash',
+            'effective_from',
+            'effective_to',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = fields
+
+
+class PocRequirementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PocRequirement
+        fields = [
+            'id',
+            'source_type',
+            'source_id',
+            'requirement_type',
+            'requirement_text',
+            'confidence_score',
+            'metadata',
+            'created_at',
+        ]
+        read_only_fields = fields
+
+
+class PocComplianceCheckSerializer(serializers.ModelSerializer):
+    judge_name = serializers.CharField(source='judge.display_name', read_only=True)
+
+    class Meta:
+        model = PocComplianceCheck
+        fields = [
+            'id',
+            'check_date',
+            'court_code',
+            'judge',
+            'judge_name',
+            'case_metadata',
+            'overall_status',
+            'violations',
+            'created_at',
+        ]
+        read_only_fields = fields
+
+
+class PocChangeEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PocChangeEvent
+        fields = [
+            'id',
+            'entity_kind',
+            'entity_id',
+            'change_type',
+            'old_hash',
+            'new_hash',
+            'detected_at',
+            'diff_text',
+            'diff_metadata',
+            'created_at',
+        ]
         read_only_fields = fields

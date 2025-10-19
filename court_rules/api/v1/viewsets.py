@@ -2,6 +2,15 @@ from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from court_rules.models import AuditAction, AuditLog, Case, Deadline, DeadlineReminder, Judge, Rule, User
+from court_rules.poc_models import (
+    PocChangeEvent,
+    PocComplianceCheck,
+    PocCourt,
+    PocJudge,
+    PocJudgeProcNode,
+    PocRequirement,
+    PocRuleNode,
+)
 from court_rules.services.audit import format_deadline_snapshot, record_audit_event
 from court_rules.api.v1.serializers import (
     AuditLogSerializer,
@@ -10,6 +19,13 @@ from court_rules.api.v1.serializers import (
     DeadlineReminderSerializer,
     DeadlineSerializer,
     JudgeSerializer,
+    PocChangeEventSerializer,
+    PocComplianceCheckSerializer,
+    PocCourtSerializer,
+    PocJudgeProcNodeSerializer,
+    PocJudgeSerializer,
+    PocRequirementSerializer,
+    PocRuleNodeSerializer,
     RuleSerializer,
     UserSerializer,
 )
@@ -111,3 +127,58 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ['get', 'head', 'options']
+
+
+class PocCourtViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PocCourt.objects.order_by('code')
+    serializer_class = PocCourtSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'head', 'options']
+
+
+class PocRuleNodeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PocRuleNode.objects.select_related('court', 'parent').order_by('court__code', 'rule_code', 'ordinal')
+    serializer_class = PocRuleNodeSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'head', 'options']
+    filterset_fields = ['court__code', 'rule_code', 'node_type', 'parent']
+
+
+class PocJudgeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PocJudge.objects.select_related('court').order_by('display_name')
+    serializer_class = PocJudgeSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'head', 'options']
+    filterset_fields = ['court__code']
+
+
+class PocJudgeProcNodeViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PocJudgeProcNode.objects.select_related('judge', 'parent').order_by('judge__display_name', 'ordinal')
+    serializer_class = PocJudgeProcNodeSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'head', 'options']
+    filterset_fields = ['judge', 'node_type', 'parent']
+
+
+class PocRequirementViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PocRequirement.objects.order_by('requirement_type', 'source_type')
+    serializer_class = PocRequirementSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'head', 'options']
+    filterset_fields = ['source_type', 'source_id', 'requirement_type']
+
+
+class PocComplianceCheckViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PocComplianceCheck.objects.select_related('judge').order_by('-check_date')
+    serializer_class = PocComplianceCheckSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'head', 'options']
+    filterset_fields = ['court_code', 'overall_status', 'judge']
+
+
+class PocChangeEventViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = PocChangeEvent.objects.order_by('-detected_at')
+    serializer_class = PocChangeEventSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'head', 'options']
+    filterset_fields = ['entity_kind', 'entity_id', 'change_type']
