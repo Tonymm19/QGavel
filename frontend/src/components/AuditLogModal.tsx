@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-import { useTheme } from '../contexts/ThemeContext';
 import { useApi } from '../hooks/useApi';
 import { Deadline, AuditLogEntry, PaginatedResponse } from '../types';
+import { componentClasses } from '../lib/theme';
 
 interface AuditLogModalProps {
   deadline: Deadline | null;
@@ -19,7 +19,6 @@ const actionLabel: Record<AuditLogEntry['action'], string> = {
 };
 
 const AuditLogModal: React.FC<AuditLogModalProps> = ({ deadline, isOpen, onClose }) => {
-  const { isDarkMode } = useTheme();
   const { apiFetch } = useApi();
   const [entries, setEntries] = useState<AuditLogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,57 +63,49 @@ const AuditLogModal: React.FC<AuditLogModalProps> = ({ deadline, isOpen, onClose
     return null;
   }
 
-  const modalBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
-  const borderColor = isDarkMode ? 'border-gray-700' : 'border-gray-200';
-  const textPrimary = isDarkMode ? 'text-white' : 'text-gray-900';
-  const textSecondary = isDarkMode ? 'text-gray-400' : 'text-gray-600';
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-xl ${modalBg}`}>
-        <div className={`p-6 border-b ${borderColor}`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className={`text-xl font-semibold ${textPrimary}`}>Audit History</h2>
-              <p className={`${textSecondary} text-sm`}>{deadline.case_caption ?? 'Untitled case'}</p>
+    <div className={componentClasses.modal.backdrop}>
+      <div className={`${componentClasses.modal.container} max-w-3xl`}>
+        <div className={componentClasses.modal.content}>
+          <div className={componentClasses.modal.header}>
+            <div className="flex items-center justify-between w-full">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Audit History</h2>
+                <p className="text-slate-600 text-sm">{deadline.case_caption ?? 'Untitled case'}</p>
+              </div>
+              <button
+                onClick={onClose}
+                className={componentClasses.button.secondary}
+              >
+                Close
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Close
-            </button>
           </div>
-        </div>
 
-        <div className="p-6 space-y-4">
+          <div className={`${componentClasses.modal.body} space-y-4`}>
           {isLoading && (
-            <div className="flex items-center space-x-2 text-sm">
+            <div className="flex items-center space-x-2 text-sm text-slate-600">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span className={textSecondary}>Loading history…</span>
+              <span>Loading history…</span>
             </div>
           )}
 
           {error && (
-            <div className={`p-3 rounded-lg text-sm ${
-              isDarkMode ? 'bg-red-900/30 text-red-200' : 'bg-red-50 text-red-700'
-            }`}>
-              {error}
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+              <p className="text-sm font-medium text-red-700">{error}</p>
             </div>
           )}
 
           {!isLoading && entries.length === 0 && !error && (
-            <p className={`text-center py-12 ${textSecondary}`}>
+            <p className="text-center py-12 text-slate-600">
               No audit entries recorded for this deadline yet.
             </p>
           )}
 
           {entries.length > 0 && (
-            <div className={`overflow-hidden border rounded-xl ${borderColor}`}>
-              <table className={`w-full text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                <thead className={isDarkMode ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}>
+            <div className="overflow-hidden border border-slate-200 rounded-xl">
+              <table className="w-full text-sm text-slate-700">
+                <thead className="bg-slate-100 text-slate-900 font-semibold">
                   <tr>
                     <th className="text-left px-4 py-3">Action</th>
                     <th className="text-left px-4 py-3">Actor</th>
@@ -126,7 +117,7 @@ const AuditLogModal: React.FC<AuditLogModalProps> = ({ deadline, isOpen, onClose
                   {entries.map((entry) => (
                     <tr
                       key={entry.id}
-                      className={isDarkMode ? 'border-t border-gray-700' : 'border-t border-gray-200'}
+                      className="border-t border-slate-200 hover:bg-slate-50 transition-colors"
                     >
                       <td className="px-4 py-3 whitespace-nowrap">
                         {actionLabel[entry.action] ?? entry.action}
@@ -136,7 +127,7 @@ const AuditLogModal: React.FC<AuditLogModalProps> = ({ deadline, isOpen, onClose
                         {new Date(entry.created_at).toLocaleString()}
                       </td>
                       <td className="px-4 py-3">
-                        <pre className={`whitespace-pre-wrap text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <pre className="whitespace-pre-wrap text-xs text-slate-600 font-mono">
                           {JSON.stringify({ before: entry.before, after: entry.after }, null, 2)}
                         </pre>
                       </td>
@@ -146,6 +137,7 @@ const AuditLogModal: React.FC<AuditLogModalProps> = ({ deadline, isOpen, onClose
               </table>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>

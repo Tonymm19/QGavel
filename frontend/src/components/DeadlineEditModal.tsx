@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
-import { useTheme } from '../contexts/ThemeContext';
 import { AppUser, Deadline, DeadlineUpdatePayload } from '../types';
+import { componentClasses } from '../lib/theme';
 
 interface DeadlineEditModalProps {
   deadline: Deadline | null;
@@ -15,7 +15,6 @@ interface DeadlineEditModalProps {
 const statusOptions: Deadline['status'][] = ['open', 'snoozed', 'done', 'missed'];
 
 const DeadlineEditModal: React.FC<DeadlineEditModalProps> = ({ deadline, isOpen, onClose, onSave, users }) => {
-  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState<DeadlineUpdatePayload>({
     status: deadline?.status,
     snooze_until: deadline?.snooze_until ?? undefined,
@@ -72,39 +71,34 @@ const DeadlineEditModal: React.FC<DeadlineEditModalProps> = ({ deadline, isOpen,
     }
   };
 
-  const modalBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
-  const borderColor = isDarkMode ? 'border-gray-700' : 'border-gray-200';
-  const textPrimary = isDarkMode ? 'text-white' : 'text-gray-900';
-  const textSecondary = isDarkMode ? 'text-gray-300' : 'text-gray-700';
-  const inputClasses = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-    isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
-  }`;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl shadow-xl ${modalBg}`}>
-        <div className={`p-6 border-b ${borderColor}`}>
-          <div className="flex items-center justify-between">
-            <h2 className={`text-xl font-semibold ${textPrimary}`}>Edit Deadline</h2>
-            <button
-              onClick={onClose}
-              className={`p-2 rounded-lg hover:${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}
-            >
-              <X className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-            </button>
+    <div className={componentClasses.modal.backdrop}>
+      <div className={componentClasses.modal.container}>
+        <div className={componentClasses.modal.content}>
+          <div className={componentClasses.modal.header}>
+            <div className="flex items-center justify-between w-full">
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900">Edit Deadline</h2>
+                <p className="text-slate-600 text-sm mt-1">
+                  {deadline.case_caption ?? 'Untitled case'}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl hover:bg-slate-100 transition-colors"
+              >
+                <X className="h-5 w-5 text-slate-600" />
+              </button>
+            </div>
           </div>
-          <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm mt-1`}>
-            {deadline.case_caption ?? 'Untitled case'}
-          </p>
-        </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form id="edit-deadline-form" onSubmit={handleSubmit} className={`${componentClasses.modal.body} space-y-6`}>
           <div>
-            <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Status</label>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">Status</label>
             <select
               value={formData.status ?? ''}
               onChange={(event) => setFormData((prev) => ({ ...prev, status: event.target.value as Deadline['status'] }))}
-              className={inputClasses}
+              className={componentClasses.input.base}
             >
               <option value="">Select status</option>
               {statusOptions.map((status) => (
@@ -116,7 +110,7 @@ const DeadlineEditModal: React.FC<DeadlineEditModalProps> = ({ deadline, isOpen,
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Owner</label>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">Owner</label>
             <select
               value={formData.owner ?? ''}
               onChange={(event) =>
@@ -125,7 +119,7 @@ const DeadlineEditModal: React.FC<DeadlineEditModalProps> = ({ deadline, isOpen,
                   owner: event.target.value ? event.target.value : null,
                 }))
               }
-              className={inputClasses}
+              className={componentClasses.input.base}
             >
               <option value="">Unassigned</option>
               {users.map((user) => (
@@ -137,7 +131,7 @@ const DeadlineEditModal: React.FC<DeadlineEditModalProps> = ({ deadline, isOpen,
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">
               Snooze Until
             </label>
             <input
@@ -149,62 +143,60 @@ const DeadlineEditModal: React.FC<DeadlineEditModalProps> = ({ deadline, isOpen,
                   snooze_until: event.target.value ? new Date(event.target.value).toISOString() : undefined,
                 }))
               }
-              className={inputClasses}
+              className={componentClasses.input.base}
             />
-            <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+            <p className="text-xs mt-1 text-slate-500">
               Leave blank to clear the snooze date.
             </p>
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Extension Notes</label>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">Extension Notes</label>
             <textarea
               value={formData.extension_notes ?? ''}
               onChange={(event) => setFormData((prev) => ({ ...prev, extension_notes: event.target.value }))}
               rows={3}
-              className={inputClasses}
+              className={componentClasses.input.base}
               placeholder="Notes about extensions or adjustments..."
             />
           </div>
 
           <div>
-            <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Outcome</label>
+            <label className="block text-sm font-semibold text-slate-900 mb-2">Outcome</label>
             <textarea
               value={formData.outcome ?? ''}
               onChange={(event) => setFormData((prev) => ({ ...prev, outcome: event.target.value }))}
               rows={3}
-              className={inputClasses}
+              className={componentClasses.input.base}
               placeholder="Outcome or resolution details..."
             />
           </div>
 
           {error && (
-            <div className={`p-3 rounded-lg text-sm ${isDarkMode ? 'bg-red-900/30 text-red-200' : 'bg-red-50 text-red-700'}`}>
-              {error}
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+              <p className="text-sm font-medium text-red-700">{error}</p>
             </div>
           )}
+          </form>
 
-          <div className="flex justify-end space-x-3 pt-2">
+          <div className={componentClasses.modal.footer}>
             <button
               type="button"
               onClick={onClose}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                isDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={componentClasses.button.secondary}
             >
               Cancel
             </button>
             <button
               type="submit"
+              form="edit-deadline-form"
               disabled={isSaving}
-              className={`px-4 py-2 rounded-lg font-medium text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isSaving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-              }`}
+              className={`${componentClasses.button.primary} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isSaving ? 'Saving…' : 'Save Changes'}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

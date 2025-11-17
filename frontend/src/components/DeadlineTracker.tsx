@@ -394,9 +394,7 @@ const DeadlineTracker: React.FC = () => {
             <select
               value={filterPriority}
               onChange={(event) => setFilterPriority(event.target.value as typeof filterPriority)}
-              className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-              }`}
+              className={componentClasses.input.base}
             >
               {PRIORITY_FILTER_OPTIONS.map((option) => (
                 <option key={option} value={option}>
@@ -407,9 +405,7 @@ const DeadlineTracker: React.FC = () => {
             <select
               value={caseFilter}
               onChange={(event) => setCaseFilter(event.target.value)}
-              className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-              }`}
+              className={componentClasses.input.base}
             >
               <option value="all">All cases</option>
               {cases.map((caseItem) => (
@@ -421,9 +417,7 @@ const DeadlineTracker: React.FC = () => {
             <select
               value={ownerFilter}
               onChange={(event) => setOwnerFilter(event.target.value)}
-              className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-              }`}
+              className={componentClasses.input.base}
             >
               <option value="all">All owners</option>
               {users.map((user) => (
@@ -438,38 +432,30 @@ const DeadlineTracker: React.FC = () => {
             <button
               onClick={handleBulkComplete}
               disabled={selectedIds.size === 0 || bulkLoading}
-              className={`px-4 py-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-sm font-medium ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 selectedIds.size === 0 || bulkLoading
-                  ? 'bg-green-300 text-green-100 cursor-not-allowed'
-                  : 'bg-green-600 text-white hover:bg-green-700'
+                  ? 'bg-emerald-300 text-emerald-100 cursor-not-allowed'
+                  : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg'
               }`}
             >
               {bulkLoading ? 'Updating…' : `Mark ${selectedIds.size || ''} Complete`}
             </button>
             <button
               onClick={() => setView('list')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 view === 'list'
-                  ? isDarkMode
-                    ? 'bg-blue-900 text-blue-300'
-                    : 'bg-blue-100 text-blue-700'
-                  : isDarkMode
-                  ? 'text-gray-300 hover:bg-gray-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               List View
             </button>
             <button
               onClick={() => setView('calendar')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
                 view === 'calendar'
-                  ? isDarkMode
-                    ? 'bg-blue-900 text-blue-300'
-                    : 'bg-blue-100 text-blue-700'
-                  : isDarkMode
-                  ? 'text-gray-300 hover:bg-gray-700'
-                  : 'text-gray-600 hover:bg-gray-100'
+                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               Calendar View
@@ -478,45 +464,43 @@ const DeadlineTracker: React.FC = () => {
         </div>
 
         {isLoading && (
-          <p className={`mt-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p className="mt-4 text-sm text-slate-500">
             Loading deadlines…
           </p>
         )}
         {actionMessage && (
-          <p className={`mt-4 text-sm ${isDarkMode ? 'text-green-300' : 'text-green-700'}`}>
+          <p className="mt-4 text-sm text-emerald-700 font-medium">
             {actionMessage}
           </p>
         )}
         {reminderError && (
-          <p className={`mt-2 text-sm ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>
+          <p className="mt-2 text-sm text-red-600">
             {reminderError}
           </p>
         )}
       </div>
 
-      <div className={`rounded-xl shadow-sm border ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
-        <div className={`p-6 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <h2 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+      <div className="bg-white rounded-2xl shadow-lg border border-slate-200">
+        <div className="p-6 border-b border-slate-200">
+          <h2 className="text-lg font-semibold text-slate-900">
             Deadlines ({filteredDeadlines.length})
           </h2>
         </div>
 
         {filteredDeadlines.length === 0 ? (
           <div className="p-12 text-center">
-            <Clock className={`h-12 w-12 mx-auto mb-4 ${isDarkMode ? 'text-gray-600' : 'text-gray-400'}`} />
-            <p className={`text-lg font-medium mb-2 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+            <Clock className="h-12 w-12 mx-auto mb-4 text-slate-400" />
+            <p className="text-lg font-medium mb-2 text-slate-900">
               No deadlines found
             </p>
-            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+            <p className="text-slate-600">
               {filterStatus !== 'all' || filterPriority !== 'all'
                 ? 'Adjust the filters to broaden your view.'
                 : 'Create a deadline to populate this list.'}
             </p>
           </div>
         ) : (
-          <div className={`divide-y ${isDarkMode ? 'divide-gray-700' : 'divide-gray-200'}`}>
+          <div className="divide-y divide-slate-200">
             {filteredDeadlines.map((deadline) => {
               const caseRecord = cases.find((candidate) => candidate.id === deadline.case);
               const urgency = getUrgencyLevel(deadline.due_at);
@@ -525,9 +509,7 @@ const DeadlineTracker: React.FC = () => {
               return (
                 <div
                   key={deadline.id}
-                  className={`p-6 transition-colors ${
-                    isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'
-                  }`}
+                  className="p-6 transition-all hover:bg-slate-50"
                 >
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div className="flex items-start space-x-4 flex-1">
@@ -536,36 +518,32 @@ const DeadlineTracker: React.FC = () => {
                           type="checkbox"
                           checked={isSelected(deadline.id)}
                           onChange={() => toggleSelection(deadline.id)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          className="h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
                         />
                       </div>
                       <div className="flex-shrink-0 mt-1">
-                        {priorityLabel === 'High' && <AlertTriangle className="h-5 w-5 text-red-500" />}
-                        {priorityLabel === 'Medium' && <Clock className="h-5 w-5 text-amber-500" />}
-                        {priorityLabel === 'Low' && <CheckCircle className="h-5 w-5 text-green-500" />}
+                        {priorityLabel === 'High' && <AlertTriangle className="h-5 w-5 text-red-600" />}
+                        {priorityLabel === 'Medium' && <Clock className="h-5 w-5 text-amber-600" />}
+                        {priorityLabel === 'Low' && <CheckCircle className="h-5 w-5 text-emerald-600" />}
                       </div>
                       <div className="flex-1">
                         <div className="flex flex-wrap items-center gap-3 mb-2">
-                          <h3 className={`text-lg font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                          <h3 className="text-lg font-semibold text-slate-900">
                             {deadline.computation_rationale || 'Procedure-driven deadline'}
                           </h3>
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                               deadline.status === 'done'
-                                ? 'bg-green-100 text-green-800'
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : deadline.status === 'missed'
-                                ? 'bg-red-100 text-red-700'
-                                : 'bg-blue-100 text-blue-800'
+                                ? 'bg-red-50 text-red-700 border border-red-200'
+                                : 'bg-blue-50 text-blue-700 border border-blue-200'
                             }`}
                           >
                             {deadline.status.charAt(0).toUpperCase() + deadline.status.slice(1)}
                           </span>
                         </div>
-                        <div
-                          className={`flex flex-wrap items-center gap-3 text-sm ${
-                            isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                          }`}
-                        >
+                        <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600">
                           <span className="flex items-center space-x-1">
                             <FileText className="h-4 w-4" />
                             <span>{deadline.case_caption ?? caseRecord?.caption ?? 'Unassigned case'}</span>
@@ -576,40 +554,32 @@ const DeadlineTracker: React.FC = () => {
                         <div className="flex flex-wrap items-center gap-3 mt-2 text-sm">
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              urgency.textColor.replace('text-', 'bg-').replace('-700', '-100') + ' ' + urgency.textColor
+                              urgency.textColor.replace('text-', 'bg-').replace('-700', '-50') + ' ' + urgency.textColor + ' border border-' + urgency.textColor.replace('text-', '').replace('-700', '-200')
                             }`}
                           >
                             {new Date(deadline.due_at).toLocaleString()}
                           </span>
-                          <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                          <span className="text-xs text-slate-500">
                             Owner: {deadline.owner_name ?? 'Unassigned'}
                           </span>
-                          <span className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                          <span className="text-xs text-slate-500">
                             Created by {deadline.created_by_name ?? 'System'}
                           </span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       {deadline.status !== 'done' && (
                         <button
                           onClick={() => handleMarkComplete(deadline)}
-                          className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                            isDarkMode
-                              ? 'bg-green-900 text-green-300 hover:bg-green-800'
-                              : 'bg-green-100 text-green-700 hover:bg-green-200'
-                          }`}
+                          className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100"
                         >
                           Mark Complete
                         </button>
                       )}
                      <button
                        onClick={() => handleViewReminders(deadline)}
-                       className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                         isDarkMode
-                           ? 'bg-indigo-900 text-indigo-300 hover:bg-indigo-800'
-                           : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                       }`}
+                       className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100"
                      >
                         Reminders
                         {deadline.pending_reminders > 0 && (
@@ -620,32 +590,20 @@ const DeadlineTracker: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleViewAudit(deadline)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          isDarkMode
-                            ? 'bg-purple-900 text-purple-300 hover:bg-purple-800'
-                            : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
-                        }`}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100"
                       >
                         History
                       </button>
                       <button
                         onClick={() => handleScheduleReminder(deadline)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          isDarkMode
-                            ? 'bg-blue-900 text-blue-300 hover:bg-blue-800'
-                            : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
-                        }`}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
                       >
                         <Bell className="h-3 w-3 mr-1 inline" />
                         Remind
                       </button>
                       <button
                         onClick={() => handleEditDeadline(deadline)}
-                        className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-                          isDarkMode
-                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors bg-slate-100 text-slate-700 border border-slate-300 hover:bg-slate-200"
                       >
                         <Edit className="h-3 w-3 mr-1 inline" />
                         Edit
@@ -660,12 +618,8 @@ const DeadlineTracker: React.FC = () => {
       </div>
 
       {view === 'calendar' && (
-        <div
-          className={`mt-8 rounded-xl border-dashed border-2 p-12 text-center ${
-            isDarkMode ? 'border-gray-700 text-gray-400' : 'border-gray-300 text-gray-600'
-          }`}
-        >
-          Calendar visualization coming soon.
+        <div className="mt-8 bg-white rounded-2xl border-dashed border-2 border-slate-300 p-12 text-center">
+          <p className="text-slate-600 text-lg font-medium">Calendar visualization coming soon.</p>
         </div>
       )}
 
