@@ -1,6 +1,5 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
-from rest_framework.authtoken.views import obtain_auth_token
 
 from court_rules.api.v1.viewsets import (
     AuditLogViewSet,
@@ -17,6 +16,7 @@ from court_rules.api.v1.viewsets import (
     PocRuleNodeViewSet,
     RuleViewSet,
     UserViewSet,
+    obtain_auth_token_email,
 )
 
 router = DefaultRouter()
@@ -36,6 +36,6 @@ router.register(r'ilnd/compliance-checks', PocComplianceCheckViewSet, basename='
 router.register(r'ilnd/change-events', PocChangeEventViewSet, basename='poc-change-event')
 
 urlpatterns = [
-    path('auth/token/', obtain_auth_token, name='api-token-auth'),
+    path('auth/token/', obtain_auth_token_email, name='api-token-auth'),
 ]
 urlpatterns += router.urls

@@ -8,9 +8,9 @@ import {
   FileText,
   AlertTriangle,
   Clock,
-  Gavel
-} from '../lucide-stub';
-import { useTheme } from '../contexts/ThemeContext';
+  Gavel,
+  Scale
+} from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -19,8 +19,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen }) => {
-  const { isDarkMode } = useTheme();
-
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'deadlines', label: 'Deadlines', icon: Clock },
@@ -37,60 +35,68 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen }) => 
   ];
 
   return (
-    <aside className={`transition-all duration-300 ${
-      isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-800 text-white'
-    } ${
+    <aside className={`transition-all duration-300 bg-slate-900 border-r border-slate-800 ${
       isOpen ? 'w-64' : 'w-0 lg:w-64'
     } overflow-hidden`}>
-      <div className="p-4">
-        <nav className="space-y-2">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                  activeTab === item.id
-                    ? isDarkMode 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-blue-500 text-white'
-                    : isDarkMode
-                    ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="font-medium">{item.label}</span>
-              </button>
-            );
-          })}
-        </nav>
+      <div className="h-full flex flex-col">
+        {/* Logo */}
+        <div className="p-6 border-b border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center">
+              <Scale className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">Precedentum</h2>
+              <p className="text-xs text-slate-400">Court Compliance</p>
+            </div>
+          </div>
+        </div>
 
-        <div className="mt-8 pt-4 border-t border-gray-700">
-          <nav className="space-y-2">
-            {secondaryItems.map((item) => {
+        {/* Navigation */}
+        <div className="flex-1 p-4 overflow-y-auto">
+          <nav className="space-y-1">
+            {menuItems.map((item) => {
               const Icon = item.icon;
+              const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => onTabChange(item.id)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                    activeTab === item.id
-                    ? isDarkMode 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-blue-500 text-white'
-                    : isDarkMode
-                    ? 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all font-medium ${
+                    isActive
+                      ? 'bg-slate-800 text-white shadow-lg'
+                      : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  <span className="text-sm">{item.label}</span>
                 </button>
               );
             })}
           </nav>
+
+          <div className="mt-8 pt-4 border-t border-slate-800">
+            <nav className="space-y-1">
+              {secondaryItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onTabChange(item.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all font-medium ${
+                      isActive
+                        ? 'bg-slate-800 text-white shadow-lg'
+                        : 'text-slate-400 hover:bg-slate-800/50 hover:text-white'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 flex-shrink-0" />
+                    <span className="text-sm">{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
         </div>
       </div>
     </aside>

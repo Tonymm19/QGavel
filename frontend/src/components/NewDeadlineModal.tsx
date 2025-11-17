@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { X } from '../lucide-stub';
+import { X } from 'lucide-react';
 
-import { useTheme } from '../contexts/ThemeContext';
 import { AppUser, Case, Deadline, NewDeadlineFormPayload } from '../types';
+import { componentClasses } from '../lib/theme';
 
 interface NewDeadlineModalProps {
   isOpen: boolean;
@@ -35,7 +35,6 @@ const buildInitialForm = (): NewDeadlineFormPayload => ({
 });
 
 const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, cases, users, onSave }) => {
-  const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState<NewDeadlineFormPayload>(buildInitialForm);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,14 +51,6 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
   if (!isOpen) {
     return null;
   }
-
-  const modalBg = isDarkMode ? 'bg-gray-800' : 'bg-white';
-  const borderColor = isDarkMode ? 'border-gray-700' : 'border-gray-200';
-  const textPrimary = isDarkMode ? 'text-white' : 'text-gray-900';
-  const textSecondary = isDarkMode ? 'text-gray-300' : 'text-gray-700';
-  const inputClasses = `w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-    isDarkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
-  }`;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -85,63 +76,64 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className={`w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-xl ${modalBg}`}>
-        <div className={`p-6 border-b ${borderColor}`}>
-          <div className="flex items-center justify-between">
-            <h2 className={`text-xl font-semibold ${textPrimary}`}>Create Deadline</h2>
-            <button
-              onClick={onClose}
-              className={`p-2 rounded-lg hover:${isDarkMode ? 'bg-gray-700' : 'bg-gray-100'}`}
-            >
-              <X className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Case *</label>
-              <select
-                value={formData.case}
-                onChange={(event) => setFormData((prev) => ({ ...prev, case: event.target.value }))}
-                className={inputClasses}
-                required
+    <div className={componentClasses.modal.backdrop}>
+      <div className={componentClasses.modal.container}>
+        <div className={componentClasses.modal.content}>
+          <div className={componentClasses.modal.header}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-slate-900">Create Deadline</h2>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-xl hover:bg-slate-100 transition-colors"
               >
-                <option value="">Select case</option>
-                {cases.map((caseItem) => (
-                  <option key={caseItem.id} value={caseItem.id}>
-                    {caseItem.caption}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Owner</label>
-              <select
-                value={formData.owner ?? ''}
-                onChange={(event) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    owner: event.target.value ? event.target.value : null,
-                  }))
-                }
-                className={inputClasses}
-              >
-                <option value="">Unassigned</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.full_name || user.email}
-                  </option>
-                ))}
-              </select>
+                <X className="h-5 w-5 text-slate-600" />
+              </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Trigger Type *</label>
+          <form id="deadline-form" onSubmit={handleSubmit} className={`${componentClasses.modal.body} space-y-6`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Case *</label>
+                <select
+                  value={formData.case}
+                  onChange={(event) => setFormData((prev) => ({ ...prev, case: event.target.value }))}
+                  className={componentClasses.input.base}
+                  required
+                >
+                  <option value="">Select case</option>
+                  {cases.map((caseItem) => (
+                    <option key={caseItem.id} value={caseItem.id}>
+                      {caseItem.caption}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Owner</label>
+                <select
+                  value={formData.owner ?? ''}
+                  onChange={(event) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      owner: event.target.value ? event.target.value : null,
+                    }))
+                  }
+                  className={componentClasses.input.base}
+                >
+                  <option value="">Unassigned</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.full_name || user.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">Trigger Type *</label>
               <select
                 value={formData.trigger_type}
                 onChange={(event) =>
@@ -150,7 +142,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                     trigger_type: event.target.value as Deadline['trigger_type'],
                   }))
                 }
-                className={inputClasses}
+                className={componentClasses.input.base}
                 required
               >
                 {triggerTypeOptions.map((option) => (
@@ -161,7 +153,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
               </select>
             </div>
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
                 Trigger Source Type
               </label>
               <input
@@ -170,7 +162,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                 onChange={(event) =>
                   setFormData((prev) => ({ ...prev, trigger_source_type: event.target.value }))
                 }
-                className={inputClasses}
+                className={componentClasses.input.base}
                 placeholder="e.g., docket_entry"
               />
             </div>
@@ -178,7 +170,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
                 Trigger Source ID
               </label>
               <input
@@ -190,12 +182,12 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                     trigger_source_id: event.target.value || null,
                   }))
                 }
-                className={inputClasses}
+                className={componentClasses.input.base}
                 placeholder="UUID or reference"
               />
             </div>
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Basis *</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Basis *</label>
               <select
                 value={formData.basis}
                 onChange={(event) =>
@@ -204,7 +196,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                     basis: event.target.value as Deadline['basis'],
                   }))
                 }
-                className={inputClasses}
+                className={componentClasses.input.base}
                 required
               >
                 {basisOptions.map((option) => (
@@ -218,22 +210,22 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Due At *</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Due At *</label>
               <input
                 type="datetime-local"
                 value={formData.due_at}
                 onChange={(event) => setFormData((prev) => ({ ...prev, due_at: event.target.value }))}
-                className={inputClasses}
+                className={componentClasses.input.base}
                 required
               />
             </div>
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Timezone *</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Timezone *</label>
               <input
                 type="text"
                 value={formData.timezone}
                 onChange={(event) => setFormData((prev) => ({ ...prev, timezone: event.target.value }))}
-                className={inputClasses}
+                className={componentClasses.input.base}
                 required
               />
             </div>
@@ -241,7 +233,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Priority *</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Priority *</label>
               <input
                 type="number"
                 min={1}
@@ -250,12 +242,12 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                 onChange={(event) =>
                   setFormData((prev) => ({ ...prev, priority: Number(event.target.value) }))
                 }
-                className={inputClasses}
+                className={componentClasses.input.base}
                 required
               />
             </div>
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Status *</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Status *</label>
               <select
                 value={formData.status}
                 onChange={(event) =>
@@ -264,7 +256,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                     status: event.target.value as Deadline['status'],
                   }))
                 }
-                className={inputClasses}
+                className={componentClasses.input.base}
                 required
               >
                 {statusOptions.map((option) => (
@@ -278,7 +270,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Snooze Until</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Snooze Until</label>
               <input
                 type="datetime-local"
                 value={formData.snooze_until ?? ''}
@@ -288,14 +280,14 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                     snooze_until: event.target.value || null,
                   }))
                 }
-                className={inputClasses}
+                className={componentClasses.input.base}
               />
               <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
                 Leave blank to create without snoozing.
               </p>
             </div>
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
                 Computation Rationale
               </label>
               <textarea
@@ -304,14 +296,14 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                   setFormData((prev) => ({ ...prev, computation_rationale: event.target.value }))
                 }
                 rows={3}
-                className={inputClasses}
+                className={componentClasses.input.base}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">
                 Extension Notes
               </label>
               <textarea
@@ -320,51 +312,45 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                   setFormData((prev) => ({ ...prev, extension_notes: event.target.value }))
                 }
                 rows={3}
-                className={inputClasses}
+                className={componentClasses.input.base}
               />
             </div>
             <div>
-              <label className={`block text-sm font-medium mb-2 ${textSecondary}`}>Outcome</label>
+              <label className="block text-sm font-semibold text-slate-900 mb-2">Outcome</label>
               <textarea
                 value={formData.outcome}
                 onChange={(event) => setFormData((prev) => ({ ...prev, outcome: event.target.value }))}
                 rows={3}
-                className={inputClasses}
+                className={componentClasses.input.base}
               />
             </div>
           </div>
 
           {error && (
-            <div className={`p-3 rounded-lg text-sm ${
-              isDarkMode ? 'bg-red-900/30 text-red-200' : 'bg-red-50 text-red-700'
-            }`}>
-              {error}
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200">
+              <p className="text-sm font-medium text-red-700">{error}</p>
             </div>
           )}
+          </form>
 
-          <div className="flex justify-end space-x-3 pt-2">
+          <div className={componentClasses.modal.footer}>
             <button
               type="button"
               onClick={onClose}
-              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                isDarkMode
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              className={componentClasses.button.secondary}
             >
               Cancel
             </button>
             <button
               type="submit"
+              form="deadline-form"
               disabled={isSaving}
-              className={`px-4 py-2 rounded-lg font-medium text-white focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                isSaving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-              }`}
+              className={`${componentClasses.button.primary} ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isSaving ? 'Saving…' : 'Create Deadline'}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

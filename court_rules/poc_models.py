@@ -25,7 +25,7 @@ class PocRuleNode(models.Model):
         ('clause', 'Clause'),
     ]
 
-    court = models.ForeignKey(PocCourt, on_delete=models.CASCADE, related_name='rules')
+    court = models.ForeignKey(PocCourt, on_delete=models.CASCADE, related_name='rules', db_column='court_code')
     rule_code = models.CharField(max_length=50)
     node_type = models.CharField(max_length=20, choices=NODE_TYPES)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
@@ -54,7 +54,7 @@ class PocRuleNode(models.Model):
 
 
 class PocJudge(models.Model):
-    court = models.ForeignKey(PocCourt, on_delete=models.CASCADE, related_name='judges')
+    court = models.ForeignKey(PocCourt, on_delete=models.CASCADE, related_name='judges', db_column='court_code')
     display_name = models.TextField()
     role = models.CharField(max_length=100, blank=True, null=True)
     courtroom = models.CharField(max_length=50, blank=True, null=True)
@@ -75,7 +75,7 @@ class PocJudge(models.Model):
 
 
 class PocJudgeProcNode(models.Model):
-    judge = models.ForeignKey(PocJudge, on_delete=models.CASCADE, related_name='procedures')
+    judge = models.ForeignKey(PocJudge, on_delete=models.CASCADE, related_name='procedures', db_column='judge_id')
     node_type = models.CharField(max_length=20)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
     ordinal = models.IntegerField(default=0)
@@ -145,7 +145,7 @@ class PocComplianceCheck(models.Model):
 
     check_date = models.DateTimeField(auto_now_add=True)
     court_code = models.CharField(max_length=20)
-    judge = models.ForeignKey(PocJudge, null=True, blank=True, on_delete=models.SET_NULL)
+    judge = models.ForeignKey(PocJudge, null=True, blank=True, on_delete=models.SET_NULL, db_column='judge_id')
     case_metadata = models.JSONField()
     overall_status = models.CharField(max_length=10, choices=STATUS_CHOICES)
     violations = models.JSONField(null=True, blank=True)

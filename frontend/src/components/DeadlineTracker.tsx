@@ -9,10 +9,11 @@ import {
   FileText,
   Bell,
   Edit,
-} from '../lucide-stub';
+} from 'lucide-react';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { useData } from '../contexts/DataContext';
+import { componentClasses, getIconContainerClass } from '../lib/theme';
 import {
   Deadline,
   DeadlineReminderCreatePayload,
@@ -322,16 +323,16 @@ const DeadlineTracker: React.FC = () => {
   );
 
   return (
-    <div className={`p-6 max-w-7xl mx-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen`}>
+    <div className="p-6 max-w-7xl mx-auto bg-slate-50 min-h-screen">
       <div className="mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className={`text-3xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Deadline Tracker</h1>
-            <p className={`mt-2 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <h1 className="text-3xl font-bold text-slate-900">Deadline Tracker</h1>
+            <p className="mt-2 text-slate-600">
               Manage and track all case deadlines with automated alerts
             </p>
             {error && (
-              <p className={`mt-2 text-sm ${isDarkMode ? 'text-red-300' : 'text-red-600'}`}>{error}</p>
+              <p className="mt-2 text-sm text-red-600 font-medium">{error}</p>
             )}
           </div>
           <button
@@ -340,52 +341,47 @@ const DeadlineTracker: React.FC = () => {
               setActionMessage(null);
               setReminderError(null);
             }}
-            className={`px-4 py-2 rounded-lg focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center space-x-2 ${
-              isDarkMode ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
+            className={componentClasses.button.primary}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-5 w-5" />
             <span>New Deadline</span>
           </button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat) => (
-          <div
-            key={stat.title}
-            className={`rounded-xl shadow-sm border p-6 ${
-              isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}
-          >
-            <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-lg ${stat.accent}`}>
-                <stat.icon className="h-6 w-6" />
+        {stats.map((stat) => {
+          const iconColor = stat.accent.includes('red') ? 'red' 
+            : stat.accent.includes('amber') ? 'amber'
+            : stat.accent.includes('blue') ? 'blue' 
+            : 'emerald';
+          return (
+            <div key={stat.title} className={componentClasses.statCard.base}>
+              <div className="flex items-center justify-between mb-4">
+                <div className={getIconContainerClass(iconColor as any)}>
+                  <stat.icon className="h-6 w-6" />
+                </div>
               </div>
               <div>
-                <p className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{stat.value}</p>
-                <p className={`text-sm font-medium ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{stat.title}</p>
+                <p className={componentClasses.statCard.number}>{stat.value}</p>
+                <p className="text-sm font-semibold text-slate-900 mt-1">{stat.title}</p>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className={`rounded-xl shadow-sm border p-6 mb-8 ${
-        isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      }`}>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-lg p-6 mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <Filter className={`h-4 w-4 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
-            <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          <div className="flex items-center gap-3">
+            <Filter className="h-5 w-5 text-slate-600" />
+            <span className="text-sm font-semibold text-slate-900">
               Filters
             </span>
             <select
               value={filterStatus}
               onChange={(event) => setFilterStatus(event.target.value as typeof filterStatus)}
-              className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-              }`}
+              className={componentClasses.input.base}
             >
               {DEADLINE_STATUS_OPTIONS.map((option) => (
                 <option key={option} value={option}>

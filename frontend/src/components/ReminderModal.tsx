@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X, Bell, Mail, MessageSquare } from '../lucide-stub';
+import { X, Bell, Mail, MessageSquare } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface ReminderModalProps {

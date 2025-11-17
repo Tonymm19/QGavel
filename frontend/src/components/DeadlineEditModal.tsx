@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X } from '../lucide-stub';
+import { X } from 'lucide-react';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { AppUser, Deadline, DeadlineUpdatePayload } from '../types';

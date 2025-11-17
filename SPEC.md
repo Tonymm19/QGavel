@@ -114,13 +114,13 @@ The main goal was to provide:
 - ✅ Registered ILND models in the Django admin and exposed read-only DRF endpoints under `/api/v1/ilnd/*` (courts, rule nodes, judges, judge procedures, requirements, compliance checks, change events); validated token auth with `curl` using demo credentials.
 
 ### Next Steps
+- 🤖 Wire up `claude_extractor.py` as a Django domain service, expose compliance/requirement extraction endpoints, and add unit + integration tests around the workflow.
+- 📦 Document ILND admin usage and `/api/v1/ilnd/*` endpoints for the team, then plan how (or if) this data surfaces in the UI.
+- 🧪 Run end-to-end smoke tests (backend + legacy frontend) against the single React bundle to confirm no regressions after the ILND import.
 - 🚀 Promote containers to managed staging/production environment (ECS/Kubernetes/Fly/etc.) using GHCR images.
 - 🔐 Wire secrets management for production (`DJANGO_SECRET_KEY`, Postgres/Redis creds, JWT lifetimes) via cloud vault or hosting env vars.
 - 📈 Introduce monitoring/alerting (app logs, uptime checks, DB metrics) and finalize backup cadence for Postgres.
 - 🤝 Execute PRD follow-ups: architecture review, advisory board kickoff, pilot firm onboarding, and funding conversations.
-- 📦 Document ILND admin/endpoint workflows for the broader team and decide how/if to surface them in the main UI.
-- 🤖 Wire up `claude_extractor.py` as a Django service and expose compliance/requirement extraction endpoints; add tests around the workflow.
-- 🧪 Run end-to-end smoke tests (backend + legacy frontend) against the single React bundle to confirm no regressions.
 - 🎨 Preserve the legacy React UI as the primary frontend; keep the fresh Vite scaffold checked in for future experiments but out of the production build pipeline.
 
 ### Session Progress – 2025-10-17
@@ -129,6 +129,19 @@ The main goal was to provide:
 - Adopted PostgreSQL locally, configured credentials in `config/settings/base.py`, and updated `CourtRulesConfig` to load ILND POC models on app ready.
 - Imported ILND demo schema/data, linked unmanaged models to raw tables (`db_table`), and validated row counts via Django shell.
 - Added admin registrations + DRF serializers/viewsets for ILND data, routed `/api/v1/ilnd/*`, and verified token retrieval with `curl`.
+- Registered a new SSH key, then committed and pushed the ILND integration work to `origin/main`.
+
+### Session Progress – 2025-11-17
+- ✅ Fixed backend authentication to accept email instead of username (custom `obtain_auth_token_email` view).
+- ✅ Fixed POC model database column mappings (`db_column` for ForeignKey fields).
+- ✅ Fixed frontend AuthContext to send `email` instead of `username` in login payload.
+- ✅ Verified full application functionality: backend API, frontend UI, authentication, all features working.
+- ✅ Analyzed Bolt.new frontend code for potential integration (located in `/frontend-bolt-review/`).
+- ✅ Identified Bolt.new strengths: Beautiful, vibrant UI with lucide-react icons, modern Tailwind styling.
+- ✅ Identified Bolt.new limitations: Supabase-based backend (incompatible), different data schema.
+- ✅ Created comprehensive integration analysis documents (BOLT_INTEGRATION_ANALYSIS.md, BOLT_QUICK_SUMMARY.md).
+- ✅ User decision: **Visual Upgrade Only** approach - extract UI/styling, keep all existing functionality.
+- 🔄 **IN PROGRESS**: Installing lucide-react icon library (resolving React 19 compatibility).
 
 ---
 

@@ -1,4 +1,4 @@
-import { Scale, Mail, Phone, MapPin, AlertCircle } from '../lucide-stub';
+import { Scale, Mail, Phone, MapPin, AlertCircle } from 'lucide-react';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { useData } from '../contexts/DataContext';

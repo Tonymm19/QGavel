@@ -1,5 +1,9 @@
-from rest_framework import mixins, viewsets
-from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth import authenticate
+from rest_framework import mixins, status, viewsets
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 
 from court_rules.models import AuditAction, AuditLog, Case, Deadline, DeadlineReminder, Judge, Rule, User
 from court_rules.poc_models import (
@@ -182,3 +186,47 @@ class PocChangeEventViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
     http_method_names = ['get', 'head', 'options']
     filterset_fields = ['entity_kind', 'entity_id', 'change_type']
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def obtain_auth_token_email(request):
+    """
+    Custom authentication view that accepts email instead of username.
+    
+    Expects JSON with:
+    - email: User's email address
+    - password: User's password
+    
+    Returns:
+    - token: Authentication token
+    - user_id: User's UUID
+    - email: User's email
+    """
+    email = request.data.get('email')
+    password = request.data.get('password')
+    
+    if not email or not password:
+        return Response(
+            {'error': 'Please provide both email and password'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Authenticate using email as username (since EMAIL_FIELD is the USERNAME_FIELD)
+    user = authenticate(request, username=email, password=password)
+    
+    if user:
+        # Get or create token for the user
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({
+            'token': token.key,
+            'user_id': str(user.id),
+            'email': user.email,
+            'full_name': user.full_name,
+            'role': user.role,
+        })
+    
+    return Response(
+        {'error': 'Invalid email or password'},
+        status=status.HTTP_401_UNAUTHORIZED
+    )

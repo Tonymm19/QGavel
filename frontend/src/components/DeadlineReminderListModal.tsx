@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Loader2, Trash2, RefreshCw, Bell } from '../lucide-stub';
+import { Loader2, Trash2, RefreshCw, Bell } from 'lucide-react';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { useApi } from '../hooks/useApi';

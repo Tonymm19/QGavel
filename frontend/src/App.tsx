@@ -32,16 +32,12 @@ function AppContent() {
         return <JudgeProfiles />;
       case 'cases':
         return (
-          <div className={`p-6 max-w-7xl mx-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen`}>
-            <h1 className={`text-3xl font-bold mb-4 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+          <div className="p-6 max-w-7xl mx-auto bg-slate-50 min-h-screen">
+            <h1 className="text-3xl font-bold mb-6 text-slate-900">
               Cases
             </h1>
-            <div className={`rounded-xl shadow-sm border p-8 text-center ${
-              isDarkMode 
-                ? 'bg-gray-800 border-gray-700' 
-                : 'bg-white border-gray-200'
-            }`}>
-              <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-12 text-center">
+              <p className="text-slate-600 text-lg">
                 Case management features coming soon...
               </p>
             </div>
@@ -121,7 +117,7 @@ function AppContent() {
   };
 
   return (
-    <div className={`h-screen flex ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <div className="h-screen flex bg-slate-50">
       {/* Sidebar */}
       <Sidebar 
         activeTab={activeTab} 
@@ -133,7 +129,7 @@ function AppContent() {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
         
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto bg-slate-50">
           {renderContent()}
         </main>
       </div>
@@ -141,7 +137,7 @@ function AppContent() {
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 lg:hidden z-40 transition-opacity"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm lg:hidden z-40 transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}

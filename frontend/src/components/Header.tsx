@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Search, Menu, User, Settings, LogOut, Moon, Sun, RefreshCcw } from '../lucide-stub';
+import { Bell, Search, Menu, User, Settings, LogOut, Moon, Sun, RefreshCcw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -22,36 +22,23 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
   };
 
   return (
-    <header className={`border-b px-4 py-3 ${
-      isDarkMode 
-        ? 'bg-gray-800 border-gray-700' 
-        : 'bg-white border-gray-200'
-    }`}>
+    <header className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm">
       <div className="flex items-center justify-between">
         {/* Left side - Menu and Logo */}
         <div className="flex items-center space-x-4">
           <button
             onClick={onMenuToggle}
-            className={`p-2 rounded-lg lg:hidden ${
-              isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-            }`}
+            className="p-2 rounded-xl hover:bg-slate-100 lg:hidden transition-colors"
           >
-            <Menu className={`h-5 w-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+            <Menu className="h-5 w-5 text-slate-600" />
           </button>
-          <div className="flex items-center space-x-3">
-            <div className={`p-2 rounded-lg ${isDarkMode ? 'bg-blue-500' : 'bg-blue-600'}`}>
-              <div className="h-6 w-6 bg-white rounded-sm flex items-center justify-center">
-                <span className={`font-bold text-sm ${isDarkMode ? 'text-blue-500' : 'text-blue-600'}`}>DC</span>
-              </div>
-            </div>
-            <div>
-              <h1 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                District Court Bot
-              </h1>
-              <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                Federal Court Compliance Platform
-              </p>
-            </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">
+              Federal Court Compliance
+            </h1>
+            <p className="text-xs text-slate-500">
+              {userEmail || 'Precedentum Platform'}
+            </p>
           </div>
         </div>
 
@@ -66,30 +53,21 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               placeholder="Search rules, deadlines, judges..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                isDarkMode 
-                  ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' 
-                  : 'bg-white border-gray-300 text-gray-900'
-              }`}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all text-slate-900 placeholder-slate-400"
             />
           </div>
         </div>
 
         {/* Right side - Notifications and Profile */}
         <div className="flex items-center space-x-4">
-          {/* Dark Mode Toggle */}
+          {/* Refresh Button */}
           <button
-            onClick={toggleDarkMode}
-            className={`p-2 rounded-lg transition-colors ${
-              isDarkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-            }`}
-            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            onClick={refresh}
+            disabled={isLoading}
+            className="p-2.5 rounded-xl hover:bg-slate-100 transition-colors disabled:opacity-50"
+            title="Refresh data"
           >
-            {isDarkMode ? (
-              <Sun className="h-5 w-5 text-yellow-500" />
-            ) : (
-              <Moon className="h-5 w-5 text-gray-600" />
-            )}
+            <RefreshCcw className={`h-5 w-5 text-slate-600 ${isLoading ? 'animate-spin' : ''}`} />
           </button>
 
           {/* Notifications */}

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Search, Book, ExternalLink, Star, AlertCircle } from '../lucide-stub';
+import { Search, Book, ExternalLink, Star, AlertCircle } from 'lucide-react';
 
 import { useTheme } from '../contexts/ThemeContext';
 import { useData } from '../contexts/DataContext';
