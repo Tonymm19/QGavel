@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QGavel Testing Checklist - Outline for Review</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+            background-color: #ffe6e6;
+            padding: 10px;
+            border-left: 4px solid #e74c3c;
+        }
+        h3 {
+            color: #7f8c8d;
+            margin-left: 20px;
+            font-size: 1.05em;
+        }
+        .description {
+            font-style: italic;
+            color: #7f8c8d;
+            margin-bottom: 15px;
+        }
+        .test-description {
+            margin-left: 40px;
+            color: #555;
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 3px solid #95a5a6;
+        }
+        .instructions {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .instructions h3 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+        .notes {
+            background-color: #d1ecf1;
+            border: 2px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .notes h3 {
+            margin: 0 0 10px 0;
+            color: #0c5460;
+        }
+        ul {
+            margin-left: 40px;
+        }
+        li {
+            margin-bottom: 5px;
+        }
+        .priority {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .p0 { background-color: #e74c3c; color: white; }
+        .p1 { background-color: #f39c12; color: white; }
+        .p2 { background-color: #3498db; color: white; }
+        .p3 { background-color: #95a5a6; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QGavel Testing Checklist - OUTLINE FOR REVIEW</h1>
+        
+        <div class="instructions">
+            <h3>📝 INSTRUCTIONS</h3>
+            <p>Review this outline, modify test categories as needed, add specific tests you want included, then return it to me and I'll create the detailed testing procedures with step-by-step instructions and expected results.</p>
+        </div>
+
+        <div class="notes">
+            <h3>🎯 Priority Levels</h3>
+            <ul>
+                <li><span class="priority p0">P0 - CRITICAL</span> Must work, blocks release</li>
+                <li><span class="priority p1">P1 - HIGH</span> Important, but workaround exists</li>
+                <li><span class="priority p2">P2 - MEDIUM</span> Should work, minor impact</li>
+                <li><span class="priority p3">P3 - LOW</span> Nice to have, cosmetic issues</li>
+            </ul>
+            <p><strong>Add priority levels to each section as you review!</strong></p>
+        </div>
+
+        <h2>1. Authentication & Access</h2>
+        <p class="description"><strong>Brief description:</strong> Testing login, logout, and user account functionality</p>
+        
+        <h3>1.1 Login Testing</h3>
+        <div class="test-description">Description: Verify users can successfully log in with valid credentials</div>
+        
+        <h3>1.2 Logout Testing</h3>
+        <div class="test-description">Description: Verify logout works and session is properly cleared</div>
+        
+        <h3>1.3 Password Reset</h3>
+        <div class="test-description">Description: Test password reset/change functionality</div>
+        
+        <h3>1.4 Invalid Login Attempts</h3>
+        <div class="test-description">Description: Verify proper error messages for wrong credentials</div>
+        
+        <h3>1.5 Session Management</h3>
+        <div class="test-description">Description: Test session timeout and re-authentication</div>
+
+        <h2>2. Judge Information</h2>
+        <p class="description"><strong>Brief description:</strong> Testing judge profiles and procedure display</p>
+        
+        <h3>2.1 View All Judges</h3>
+        <div class="test-description">Description: Verify all 8 N.D. Illinois judges are displayed correctly</div>
+        
+        <h3>2.2 Judge Profile Details</h3>
+        <div class="test-description">Description: Check that judge information is accurate and complete</div>
+        
+        <h3>2.3 Judge Procedures</h3>
+        <div class="test-description">Description: Verify each judge's specific procedures are accessible</div>
+        
+        <h3>2.4 Judge Search</h3>
+        <div class="test-description">Description: Test searching for judges by name or other criteria</div>
+        
+        <h3>2.5 Judge Filtering</h3>
+        <div class="test-description">Description: Test filtering judges by court, status, or other attributes</div>
+
+        <h2>3. Case Management</h2>
+        <p class="description"><strong>Brief description:</strong> Testing case creation, editing, and viewing</p>
+        
+        <h3>3.1 Create New Case</h3>
+        <div class="test-description">Description: Verify users can successfully create a new case</div>
+        
+        <h3>3.2 View Case List</h3>
+        <div class="test-description">Description: Test viewing all cases in list format</div>
+        
+        <h3>3.3 View Case Details</h3>
+        <div class="test-description">Description: Verify individual case information displays correctly</div>
+        
+        <h3>3.4 Edit Case Information</h3>
+        <div class="test-description">Description: Test modifying existing case details</div>
+        
+        <h3>3.5 Delete Case</h3>
+        <div class="test-description">Description: Verify case deletion works (if permitted)</div>
+        
+        <h3>3.6 Assign Judge to Case</h3>
+        <div class="test-description">Description: Test linking a judge to a case</div>
+        
+        <h3>3.7 Case Search</h3>
+        <div class="test-description">Description: Test searching for specific cases</div>
+
+        <h2>4. Deadline Management</h2>
+        <p class="description"><strong>Brief description:</strong> Testing deadline creation, calculation, and tracking</p>
+        
+        <h3>4.1 Create Deadline</h3>
+        <div class="test-description">Description: Verify users can add deadlines to cases</div>
+        
+        <h3>4.2 Deadline Calculation</h3>
+        <div class="test-description">Description: Test that deadlines are calculated correctly based on rules</div>
+        
+        <h3>4.3 View Deadlines</h3>
+        <div class="test-description">Description: Verify deadline list/calendar displays properly</div>
+        
+        <h3>4.4 Edit Deadline</h3>
+        <div class="test-description">Description: Test modifying existing deadlines</div>
+        
+        <h3>4.5 Delete Deadline</h3>
+        <div class="test-description">Description: Verify deadline removal works</div>
+        
+        <h3>4.6 Deadline Alerts</h3>
+        <div class="test-description">Description: Test that notifications are sent for upcoming deadlines</div>
+        
+        <h3>4.7 Deadline Calendar View</h3>
+        <div class="test-description">Description: Verify calendar display shows deadlines correctly</div>
+
+        <h2>5. Calendar Integration</h2>
+        <p class="description"><strong>Brief description:</strong> Testing calendar export functionality</p>
+        
+        <h3>5.1 Export to Calendar</h3>
+        <div class="test-description">Description: Verify .ics file is generated correctly</div>
+        
+        <h3>5.2 Calendar File Format</h3>
+        <div class="test-description">Description: Test that exported file opens in Outlook/Google Calendar</div>
+        
+        <h3>5.3 Deadline Details in Export</h3>
+        <div class="test-description">Description: Verify all deadline information is included in export</div>
+        
+        <h3>5.4 Multiple Deadlines Export</h3>
+        <div class="test-description">Description: Test exporting multiple deadlines at once</div>
+
+        <h2>6. Court Rules & Procedures</h2>
+        <p class="description"><strong>Brief description:</strong> Testing access to court rules and procedures</p>
+        
+        <h3>6.1 View Court Rules</h3>
+        <div class="test-description">Description: Verify court rules are accessible and readable</div>
+        
+        <h3>6.2 Search Rules</h3>
+        <div class="test-description">Description: Test searching within court rules</div>
+        
+        <h3>6.3 View Procedures</h3>
+        <div class="test-description">Description: Verify procedure documents display correctly</div>
+        
+        <h3>6.4 Procedure Categorization</h3>
+        <div class="test-description">Description: Test that procedures are organized logically</div>
+
+        <h2>7. Search & Navigation</h2>
+        <p class="description"><strong>Brief description:</strong> Testing search functionality and site navigation</p>
+        
+        <h3>7.1 Global Search</h3>
+        <div class="test-description">Description: Verify search works across all content types</div>
+        
+        <h3>7.2 Search Results</h3>
+        <div class="test-description">Description: Test that search results are relevant and complete</div>
+        
+        <h3>7.3 Navigation Menu</h3>
+        <div class="test-description">Description: Verify all menu items work correctly</div>
+        
+        <h3>7.4 Breadcrumbs</h3>
+        <div class="test-description">Description: Test breadcrumb navigation (if applicable)</div>
+        
+        <h3>7.5 Back Button Functionality</h3>
+        <div class="test-description">Description: Verify browser back button works as expected</div>
+
+        <h2>8. User Interface & Experience</h2>
+        <p class="description"><strong>Brief description:</strong> Testing overall usability and interface design</p>
+        
+        <h3>8.1 Page Load Times</h3>
+        <div class="test-description">Description: Verify pages load within 2-3 seconds</div>
+        
+        <h3>8.2 Responsive Design</h3>
+        <div class="test-description">Description: Test on different screen sizes (desktop, tablet, mobile)</div>
+        
+        <h3>8.3 Visual Consistency</h3>
+        <div class="test-description">Description: Check that design is consistent across pages</div>
+        
+        <h3>8.4 Error Messages</h3>
+        <div class="test-description">Description: Verify error messages are clear and helpful</div>
+        
+        <h3>8.5 Form Validation</h3>
+        <div class="test-description">Description: Test that forms validate input properly</div>
+        
+        <h3>8.6 Button Functionality</h3>
+        <div class="test-description">Description: Verify all buttons perform expected actions</div>
+
+        <h2>9. Data Accuracy</h2>
+        <p class="description"><strong>Brief description:</strong> Testing that data is correct and complete</p>
+        
+        <h3>9.1 Judge Information Accuracy</h3>
+        <div class="test-description">Description: Verify judge names, courts, and details are correct</div>
+        
+        <h3>9.2 Procedure Accuracy</h3>
+        <div class="test-description">Description: Check that procedures match actual court requirements</div>
+        
+        <h3>9.3 Deadline Calculations</h3>
+        <div class="test-description">Description: Verify calculated dates are correct</div>
+        
+        <h3>9.4 Court Rules Accuracy</h3>
+        <div class="test-description">Description: Check that rules are current and correct</div>
+
+        <h2>10. Performance Testing</h2>
+        <p class="description"><strong>Brief description:</strong> Testing system speed and responsiveness</p>
+        
+        <h3>10.1 Page Load Speed</h3>
+        <div class="test-description">Description: Measure time to load each major page</div>
+        
+        <h3>10.2 Search Performance</h3>
+        <div class="test-description">Description: Test search response time</div>
+        
+        <h3>10.3 Concurrent Users</h3>
+        <div class="test-description">Description: Test with multiple users logged in simultaneously</div>
+        
+        <h3>10.4 Large Data Sets</h3>
+        <div class="test-description">Description: Test performance with many cases/deadlines</div>
+
+        <h2>11. Error Handling</h2>
+        <p class="description"><strong>Brief description:</strong> Testing system behavior when errors occur</p>
+        
+        <h3>11.1 Network Errors</h3>
+        <div class="test-description">Description: Test behavior when internet connection is lost</div>
+        
+        <h3>11.2 Invalid Input</h3>
+        <div class="test-description">Description: Verify proper handling of invalid data entry</div>
+        
+        <h3>11.3 404 Pages</h3>
+        <div class="test-description">Description: Test that non-existent pages show proper error</div>
+        
+        <h3>11.4 Server Errors</h3>
+        <div class="test-description">Description: Verify graceful handling of server issues</div>
+
+        <h2>12. Security Testing</h2>
+        <p class="description"><strong>Brief description:</strong> Testing security features and access control</p>
+        
+        <h3>12.1 Unauthorized Access</h3>
+        <div class="test-description">Description: Verify users can't access pages they shouldn't</div>
+        
+        <h3>12.2 Data Privacy</h3>
+        <div class="test-description">Description: Test that users only see their own data (if applicable)</div>
+        
+        <h3>12.3 SQL Injection</h3>
+        <div class="test-description">Description: Test input fields for SQL injection vulnerabilities</div>
+        
+        <h3>12.4 XSS Prevention</h3>
+        <div class="test-description">Description: Test for cross-site scripting vulnerabilities</div>
+        
+        <h3>12.5 HTTPS Enforcement</h3>
+        <div class="test-description">Description: Verify all pages use HTTPS</div>
+
+        <h2>13. Browser Compatibility</h2>
+        <p class="description"><strong>Brief description:</strong> Testing across different web browsers</p>
+        
+        <h3>13.1 Chrome Testing</h3>
+        <div class="test-description">Description: Verify full functionality in Google Chrome</div>
+        
+        <h3>13.2 Firefox Testing</h3>
+        <div class="test-description">Description: Test all features in Mozilla Firefox</div>
+        
+        <h3>13.3 Safari Testing</h3>
+        <div class="test-description">Description: Verify functionality in Safari (Mac)</div>
+        
+        <h3>13.4 Edge Testing</h3>
+        <div class="test-description">Description: Test in Microsoft Edge</div>
+
+        <h2>14. Mobile Testing (if applicable)</h2>
+        <p class="description"><strong>Brief description:</strong> Testing on mobile devices</p>
+        
+        <h3>14.1 Mobile Responsiveness</h3>
+        <div class="test-description">Description: Verify interface adapts to mobile screens</div>
+        
+        <h3>14.2 Touch Interactions</h3>
+        <div class="test-description">Description: Test tap, swipe, and scroll on mobile</div>
+        
+        <h3>14.3 Mobile Browser Compatibility</h3>
+        <div class="test-description">Description: Test on mobile Safari and Chrome</div>
+
+        <h2>15. Integration Testing</h2>
+        <p class="description"><strong>Brief description:</strong> Testing connections with external systems</p>
+        
+        <h3>15.1 Database Connection</h3>
+        <div class="test-description">Description: Verify database reads/writes work correctly</div>
+        
+        <h3>15.2 Email Notifications</h3>
+        <div class="test-description">Description: Test that emails are sent properly (if applicable)</div>
+        
+        <h3>15.3 Calendar Integration</h3>
+        <div class="test-description">Description: Verify exported calendars work with external apps</div>
+        
+        <h3>15.4 API Endpoints</h3>
+        <div class="test-description">Description: Test API responses (if applicable)</div>
+
+        <h2>16. Regression Testing</h2>
+        <p class="description"><strong>Brief description:</strong> Verifying previous bugs don't reappear</p>
+        
+        <h3>16.1 Known Bug Fixes</h3>
+        <div class="test-description">Description: Re-test previously fixed issues</div>
+        
+        <h3>16.2 Core Functionality</h3>
+        <div class="test-description">Description: Verify main features still work after updates</div>
+
+        <div class="notes">
+            <h3>📌 NOTES FOR MODIFICATION</h3>
+            
+            <p><strong>Add test categories if needed:</strong></p>
+            <ul>
+                <li>Document upload/download testing</li>
+                <li>Report generation testing</li>
+                <li>Billing/payment testing</li>
+                <li>Team collaboration features</li>
+                <li>Admin-specific functionality</li>
+                <li>Export/import data testing</li>
+                <li>Notification settings testing</li>
+            </ul>
+            
+            <p><strong>Remove test categories if not applicable:</strong></p>
+            <ul>
+                <li>Mobile testing (if desktop-only)</li>
+                <li>API testing (if no API)</li>
+                <li>Email notifications (if not implemented)</li>
+                <li>Features you haven't built yet</li>
+            </ul>
+            
+            <p><strong>For each test section, consider adding:</strong></p>
+            <ul>
+                <li>Priority level (P0, P1, P2, P3)</li>
+                <li>Specific test scenarios</li>
+                <li>Expected behavior</li>
+                <li>Who should test it (dev, QA, user)</li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <h3>🔄 NEXT STEPS</h3>
+            <ol>
+                <li>Open this HTML file in Microsoft Word</li>
+                <li>Review the testing outline</li>
+                <li>Add/remove/modify test categories as needed</li>
+                <li>Mark which tests are CRITICAL (P0) vs. NICE-TO-HAVE (P3)</li>
+                <li>Add any QGavel-specific tests I missed</li>
+                <li>Save your modified version</li>
+                <li>Return it to me and I'll create:
+                    <ul>
+                        <li>Detailed step-by-step test procedures</li>
+                        <li>Expected results for each test</li>
+                        <li>Bug reporting template</li>
+                        <li>Test tracking spreadsheet template</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Search, Menu, User, Settings, LogOut, Moon, Sun, RefreshCcw } from 'lucide-react';
+import { Bell, Search, Menu, User, Settings, LogOut, RefreshCcw } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
@@ -9,12 +9,15 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
-  const { isDarkMode, toggleDarkMode } = useTheme();
-  const { logout, userEmail } = useAuth();
+  const { isDarkMode, toggleDarkMode: _toggleDarkMode } = useTheme();
+  const { logout, userEmail, user } = useAuth();
   const { refresh, isLoading, error } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+
+  const userName = user?.full_name || user?.first_name || 'User';
+  const organizationName = user?.organization_name || '';
 
   const handleLogout = () => {
     logout();
@@ -34,10 +37,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
           </button>
           <div>
             <h1 className="text-xl font-bold text-slate-900">
-              Federal Court Compliance
+              {userName}
             </h1>
             <p className="text-xs text-slate-500">
-              {userEmail || 'Precedentum Platform'}
+              {organizationName || 'Precedentum Platform'}
             </p>
           </div>
         </div>
@@ -125,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               <span className={`hidden md:block text-sm font-medium ${
                 isDarkMode ? 'text-white' : 'text-gray-900'
               }`}>
-                Sarah Chen
+                {userName}
               </span>
             </button>
 
@@ -137,10 +140,10 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle }) => {
               }`}>
                 <div className={`p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
                   <p className={`text-sm font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
-                    {userEmail ?? 'Authenticated user'}
+                    {userName}
                   </p>
                   <p className={`text-xs ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Signed in via token auth
+                    {organizationName || userEmail}
                   </p>
                 </div>
                 <div className="py-2">

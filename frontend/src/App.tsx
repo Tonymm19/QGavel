@@ -1,18 +1,25 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
+import EnhancedDashboard from './components/EnhancedDashboard';
 import RulesSearch from './components/RulesSearch';
 import JudgeProfiles from './components/JudgeProfiles';
 import DeadlineTracker from './components/DeadlineTracker';
+import CasesPanel from './components/CasesPanel';
+import AdminPanel from './components/admin/AdminPanel';
+import BillingPanel from './components/billing/BillingPanel';
 import LoginScreen from './components/LoginScreen';
+import ForgotPasswordScreen from './components/ForgotPasswordScreen';
+import ResetPasswordScreen from './components/ResetPasswordScreen';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { DataProvider } from './contexts/DataContext';
 
 function AppContent() {
   const { isDarkMode } = useTheme();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -23,7 +30,7 @@ function AppContent() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard />;
+        return <EnhancedDashboard onNavigate={setActiveTab} />;
       case 'deadlines':
         return <DeadlineTracker />;
       case 'rules':
@@ -31,18 +38,7 @@ function AppContent() {
       case 'judges':
         return <JudgeProfiles />;
       case 'cases':
-        return (
-          <div className="p-6 max-w-7xl mx-auto bg-slate-50 min-h-screen">
-            <h1 className="text-3xl font-bold mb-6 text-slate-900">
-              Cases
-            </h1>
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-12 text-center">
-              <p className="text-slate-600 text-lg">
-                Case management features coming soon...
-              </p>
-            </div>
-          </div>
-        );
+        return <CasesPanel />;
       case 'alerts':
         return (
           <div className={`p-6 max-w-7xl mx-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen`}>
@@ -94,6 +90,10 @@ function AppContent() {
             </div>
           </div>
         );
+      case 'admin':
+        return <AdminPanel userRole={user?.role || ''} />;
+      case 'billing':
+        return <BillingPanel />;
       case 'settings':
         return (
           <div className={`p-6 max-w-7xl mx-auto ${isDarkMode ? 'bg-gray-900' : 'bg-gray-50'} min-h-screen`}>
@@ -123,6 +123,7 @@ function AppContent() {
         activeTab={activeTab} 
         onTabChange={setActiveTab}
         isOpen={sidebarOpen}
+        userRole={user?.role}
       />
 
       {/* Main Content */}
@@ -147,13 +148,19 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <DataProvider>
-          <AppContent />
-        </DataProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <DataProvider>
+            <Routes>
+              <Route path="/forgot-password" element={<ForgotPasswordScreen />} />
+              <Route path="/reset-password" element={<ResetPasswordScreen />} />
+              <Route path="/*" element={<AppContent />} />
+            </Routes>
+          </DataProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 }
 

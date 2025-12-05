@@ -6,7 +6,7 @@ import ReminderModal, { ReminderData } from './ReminderModal';
 import { componentClasses, getIconContainerClass } from '../lib/theme';
 
 const Dashboard: React.FC = () => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode: _isDarkMode } = useTheme();
   const { cases, deadlines, judges, isLoading, error } = useData();
   const [showReminderModal, setShowReminderModal] = React.useState(false);
 

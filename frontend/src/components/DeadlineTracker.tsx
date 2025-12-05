@@ -9,6 +9,7 @@ import {
   FileText,
   Bell,
   Edit,
+  X,
 } from 'lucide-react';
 
 import { useTheme } from '../contexts/ThemeContext';
@@ -37,7 +38,7 @@ const DEADLINE_STATUS_OPTIONS: Array<'all' | 'open' | 'snoozed' | 'missed' | 'do
 const PRIORITY_FILTER_OPTIONS: Array<'all' | 'High' | 'Medium' | 'Low'> = ['all', 'High', 'Medium', 'Low'];
 
 const DeadlineTracker: React.FC = () => {
-  const { isDarkMode } = useTheme();
+  const { isDarkMode: _isDarkMode } = useTheme();
   const {
     deadlines,
     cases,
@@ -48,6 +49,8 @@ const DeadlineTracker: React.FC = () => {
     updateDeadline,
     createDeadline,
   } = useData();
+  
+  const [showInlineForm, setShowInlineForm] = useState(false);
 
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [filterStatus, setFilterStatus] = useState<(typeof DEADLINE_STATUS_OPTIONS)[number]>('all');
@@ -324,7 +327,7 @@ const DeadlineTracker: React.FC = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto bg-slate-50 min-h-screen">
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">Deadline Tracker</h1>
@@ -335,18 +338,202 @@ const DeadlineTracker: React.FC = () => {
               <p className="mt-2 text-sm text-red-600 font-medium">{error}</p>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Add New Deadline Form - Top Center */}
+      <div className="mb-8">
+        <div className="flex justify-center">
           <button
             onClick={() => {
-              setShowNewDeadlineModal(true);
-              setActionMessage(null);
-              setReminderError(null);
+              setShowInlineForm(!showInlineForm);
+              if (!showInlineForm) {
+                setShowNewDeadlineModal(false);
+                setActionMessage(null);
+                setReminderError(null);
+              }
             }}
-            className={componentClasses.button.primary}
+            className={`${componentClasses.button.primary} text-base`}
           >
             <Plus className="h-5 w-5" />
-            <span>New Deadline</span>
+            <span>Add New Deadline</span>
           </button>
         </div>
+        
+        {showInlineForm && (
+          <div className="mt-6 bg-white rounded-2xl border-2 border-blue-200 shadow-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-slate-900">Create New Deadline</h2>
+              <button
+                onClick={() => setShowInlineForm(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget;
+                const formData = new FormData(form);
+                
+                try {
+                  const payload: NewDeadlineFormPayload = {
+                    case: formData.get('case') as string,
+                    trigger_type: (formData.get('trigger_type') as Deadline['trigger_type']) || 'user',
+                    trigger_source_type: '',
+                    trigger_source_id: null,
+                    basis: (formData.get('basis') as Deadline['basis']) || 'calendar_days',
+                    holiday_calendar: null,
+                    due_at: new Date(formData.get('due_at') as string).toISOString(),
+                    timezone: 'America/Chicago',
+                    owner: formData.get('owner') ? (formData.get('owner') as string) : null,
+                    priority: parseInt(formData.get('priority') as string) || 3,
+                    status: 'open',
+                    snooze_until: null,
+                    extension_notes: '',
+                    outcome: '',
+                    computation_rationale: formData.get('notes') as string || '',
+                  };
+                  
+                  await createDeadline(payload);
+                  setShowInlineForm(false);
+                  form.reset();
+                  setActionMessage('Deadline created successfully!');
+                  setTimeout(() => setActionMessage(null), 3000);
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : 'Failed to create deadline';
+                  setReminderError(message);
+                }
+              }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Case <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="case"
+                    required
+                    className={componentClasses.input.base}
+                  >
+                    <option value="">Select a case</option>
+                    {cases.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.caption || c.case_number}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Due Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="due_at"
+                    required
+                    className={componentClasses.input.base}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Trigger Type
+                  </label>
+                  <select
+                    name="trigger_type"
+                    className={componentClasses.input.base}
+                  >
+                    <option value="filing">Filing</option>
+                    <option value="rule">Rule</option>
+                    <option value="court_order">Court Order</option>
+                    <option value="user">User Defined</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Basis
+                  </label>
+                  <select
+                    name="basis"
+                    className={componentClasses.input.base}
+                  >
+                    <option value="calendar_days">Calendar Days</option>
+                    <option value="business_days">Business Days</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Assign To
+                  </label>
+                  <select
+                    name="owner"
+                    className={componentClasses.input.base}
+                  >
+                    <option value="">Unassigned</option>
+                    {users.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.full_name || u.email}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Priority
+                  </label>
+                  <select
+                    name="priority"
+                    defaultValue="3"
+                    className={componentClasses.input.base}
+                  >
+                    <option value="1">1 - Lowest</option>
+                    <option value="2">2 - Low</option>
+                    <option value="3">3 - Medium</option>
+                    <option value="4">4 - High</option>
+                    <option value="5">5 - Critical</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-900 mb-2">
+                  Notes / Computation Rationale
+                </label>
+                <textarea
+                  name="notes"
+                  rows={3}
+                  placeholder="Add any notes or computation details..."
+                  className={componentClasses.input.base}
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setShowInlineForm(false)}
+                  className={componentClasses.button.secondary}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className={componentClasses.button.primary}
+                >
+                  <Plus className="h-5 w-5" />
+                  <span>Create Deadline</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

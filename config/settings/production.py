@@ -53,6 +53,7 @@ if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:  # type: igno
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] = [  # type: ignore # noqa: F405
+    'rest_framework.authentication.TokenAuthentication',
     'rest_framework_simplejwt.authentication.JWTAuthentication',
 ]
 

@@ -21,6 +21,27 @@ export interface Judge {
   chambers_url: string;
   contact_email: string;
   contact_phone: string;
+  // Court Reporter
+  court_reporter_name: string;
+  court_reporter_phone: string;
+  court_reporter_room: string;
+  // Courtroom Deputy
+  clerk_name: string;
+  clerk_phone: string;
+  clerk_email: string;
+  clerk_room: string;
+  // Executive Law Clerk
+  executive_law_clerk: string;
+  executive_law_clerk_phone: string;
+  executive_law_clerk_room: string;
+  // Judicial Assistant
+  judicial_assistant: string;
+  judicial_assistant_phone: string;
+  judicial_assistant_room: string;
+  // Law Clerks
+  apprentices: string;
+  // Legacy field
+  additional_staff: string;
   holiday_calendar: string | null;
   holiday_calendar_name: string | null;
 }

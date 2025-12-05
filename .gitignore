@@ -1,0 +1,195 @@
+# =============================================================================
+# QGavel Security & Sensitive Data - CRITICAL
+# =============================================================================
+
+# AWS Credentials & Infrastructure IDs
+aws-deployment/rds-info-SECURE.txt
+aws-deployment/vpc-info.txt
+aws-deployment/*-info.txt
+aws-deployment/*SECURE*
+aws-deployment/*.pem
+aws-deployment/*.key
+
+# Temporary RDS Connection Scripts (contain credentials)
+test_rds_connection.py
+migrate_to_rds.py
+create_superuser_rds.py
+load_data_rds.py
+seed_*_rds.py
+
+# Environment Files (API keys, secrets, passwords)
+.env
+.env.*
+!.env.example
+env.local
+.envrc
+
+# AWS CLI credentials
+.aws/
+aws-credentials.txt
+
+# Session tracking (may contain sensitive context)
+CURRENT_SESSION.md
+
+# =============================================================================
+# Python
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Database dumps
+*.sql
+*.dump
+*.backup
+
+# =============================================================================
+# Frontend
+# =============================================================================
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+
+# Frontend environment
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =============================================================================
+# IDEs and Editors
+# =============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+
+# Cursor
+.cursorrules.local
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# =============================================================================
+# Operating System
+# =============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# =============================================================================
+# Docker & Deployment
+# =============================================================================
+
+# Docker volumes and local data
+docker-compose.override.yml
+.dockerignore.local
+
+# =============================================================================
+# Testing & Temporary Files
+# =============================================================================
+
+# Testing packages and artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# =============================================================================
+# Documentation (Private/Draft)
+# =============================================================================
+
+# Private notes and drafts
+PRIVATE_*.md
+*_PRIVATE.md
+drafts/
+notes/
+
+# =============================================================================
+# SSL Certificates & Keys
+# =============================================================================
+
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+ssl/
+certs/
+
+# =============================================================================
+# Logs and Monitoring
+# =============================================================================
+
+logs/
+*.log
+log/
+

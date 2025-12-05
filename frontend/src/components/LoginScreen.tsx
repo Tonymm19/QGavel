@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LogIn, Scale } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { useAuth } from '../contexts/AuthContext';
 import { componentClasses } from '../lib/theme';
@@ -72,9 +73,17 @@ const LoginScreen: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-900 mb-2">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-slate-900">
+                  Password
+                </label>
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <input
                 type="password"
                 value={password}

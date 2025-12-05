@@ -37,21 +37,61 @@ class UserManager(BaseUserManager):
         return self._create_user(email, password, **extra_fields)
 
 
+class Organization(models.Model):
+    """Organization/Customer (Law Firm) model with multi-tenancy support."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=255)
+    address_line1 = models.CharField(max_length=255, blank=True)
+    address_line2 = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100, blank=True)
+    state = models.CharField(max_length=2, blank=True, help_text="Two-letter US state code")
+    zip_code = models.CharField(max_length=10, blank=True)
+    phone = models.CharField(max_length=20, blank=True, help_text="US phone number")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "organizations"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
 class UserRole(models.TextChoices):
-     ADMIN = "admin", "Admin"
-     LAWYER = "lawyer", "Lawyer"
-     PARALEGAL = "paralegal", "Paralegal"
-     GUEST = "guest", "Guest"
+    SUPER_ADMIN = "super_admin", "Super Admin"  # Type 1
+    FIRM_ADMIN = "firm_admin", "Site Admin"  # Type 2
+    MANAGING_LAWYER = "managing_lawyer", "Managing Lawyer"  # Type 3
+    LAWYER = "lawyer", "Lawyer"  # Type 4
+    PARALEGAL = "paralegal", "Paralegal"  # Type 5
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
-    full_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.PROTECT,
+        related_name="users",
+        null=True,  # Temporarily nullable for migration
+        blank=True,
+        help_text="Law firm/customer this user belongs to"
+    )
+    phone = models.CharField(max_length=20, blank=True, help_text="US phone number")
     role = models.CharField(max_length=20, choices=UserRole.choices)
-    firm = models.CharField(max_length=255, blank=True)
     timezone = models.CharField(max_length=64, default="America/Chicago")
     mfa_enabled = models.BooleanField(default=False)
+    created_by = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="created_users",
+        help_text="Admin who created this user"
+    )
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -59,16 +99,98 @@ class User(AbstractBaseUser, PermissionsMixin):
     deleted_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["full_name"]
+    REQUIRED_FIELDS = ["first_name", "last_name"]
 
     objects = UserManager()
 
     class Meta:
         db_table = "users"
-        ordering = ["full_name"]
+        ordering = ["first_name", "last_name"]
+        indexes = [
+            models.Index(fields=["organization", "role"], name="idx_user_org_role"),
+            models.Index(fields=["organization", "is_active"], name="idx_user_org_active"),
+        ]
 
     def __str__(self):
-        return self.full_name
+        return f"{self.first_name} {self.last_name}"
+
+    @property
+    def full_name(self):
+        """Backward compatibility property."""
+        return f"{self.first_name} {self.last_name}".strip()
+
+    def is_super_admin(self):
+        """Check if user is Type 1 Super Admin."""
+        return self.role == UserRole.SUPER_ADMIN
+
+    def is_firm_admin(self):
+        """Check if user is Type 2 Site Admin."""
+        return self.role == UserRole.FIRM_ADMIN
+
+    def is_managing_lawyer(self):
+        """Check if user is Type 3 Managing Lawyer."""
+        return self.role == UserRole.MANAGING_LAWYER
+
+    def can_create_users(self):
+        """Check if user can create other users."""
+        return self.role in [UserRole.SUPER_ADMIN, UserRole.FIRM_ADMIN]
+
+    def can_manage_access_grants(self):
+        """Check if user can grant/revoke access."""
+        return self.role in [UserRole.SUPER_ADMIN, UserRole.FIRM_ADMIN]
+
+
+class UserAccessGrant(models.Model):
+    """
+    Access control for viewing other users' data.
+    Type 3 can view Type 3,4,5 users (if granted)
+    Type 4 can view Type 4,5 users (if granted)
+    Type 5 can view Type 5 users (if granted)
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="access_grants",
+        help_text="Organization this grant belongs to"
+    )
+    granted_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="access_grants_given",
+        help_text="Admin who granted this access (Type 1 or 2)"
+    )
+    granted_to = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="access_grants_received",
+        help_text="User receiving access (Type 3 or 4)"
+    )
+    can_access_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="accessed_by",
+        help_text="User whose data can be accessed (Type 3, 4, or 5)"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "user_access_grants"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["granted_to", "can_access_user"],
+                name="unique_access_grant"
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["granted_to", "is_active"], name="idx_grant_to_active"),
+            models.Index(fields=["organization"], name="idx_grant_org"),
+        ]
+
+    def __str__(self):
+        return f"{self.granted_to} can access {self.can_access_user}'s data"
 
 
 class UUIDModel(models.Model):
@@ -85,6 +207,8 @@ class Court(UUIDModel):
     location = models.CharField(max_length=255, blank=True)
     timezone = models.CharField(max_length=64)
     website_url = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "courts"
@@ -99,6 +223,8 @@ class HolidayCalendar(UUIDModel):
     jurisdiction = models.CharField(max_length=255, blank=True)
     timezone = models.CharField(max_length=64)
     source_url = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "holiday_calendars"
@@ -112,6 +238,8 @@ class Holiday(UUIDModel):
     calendar = models.ForeignKey(HolidayCalendar, on_delete=models.CASCADE, related_name="holidays")
     date = models.DateField()
     name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "holidays"
@@ -131,7 +259,30 @@ class Judge(UUIDModel):
     chambers_url = models.URLField(blank=True)
     contact_email = models.EmailField(blank=True)
     contact_phone = models.CharField(max_length=50, blank=True)
+    # Court Reporter information
+    court_reporter_name = models.CharField(max_length=255, blank=True, help_text="Court Reporter's name")
+    court_reporter_phone = models.CharField(max_length=50, blank=True, help_text="Court Reporter's phone number")
+    court_reporter_room = models.CharField(max_length=100, blank=True, help_text="Court Reporter's room/office number")
+    # Courtroom Deputy information
+    clerk_name = models.CharField(max_length=255, blank=True, help_text="Name of Courtroom Deputy")
+    clerk_phone = models.CharField(max_length=50, blank=True, help_text="Courtroom Deputy's phone number")
+    clerk_email = models.EmailField(blank=True, help_text="Courtroom Deputy's email address")
+    clerk_room = models.CharField(max_length=100, blank=True, help_text="Courtroom Deputy's room/office number")
+    # Executive Law Clerk information
+    executive_law_clerk = models.CharField(max_length=255, blank=True, help_text="Executive Law Clerk name")
+    executive_law_clerk_phone = models.CharField(max_length=50, blank=True, help_text="Executive Law Clerk's phone number")
+    executive_law_clerk_room = models.CharField(max_length=100, blank=True, help_text="Executive Law Clerk's room/office number")
+    # Judicial Assistant information
+    judicial_assistant = models.CharField(max_length=255, blank=True, help_text="Judicial Assistant name")
+    judicial_assistant_phone = models.CharField(max_length=50, blank=True, help_text="Judicial Assistant's phone number")
+    judicial_assistant_room = models.CharField(max_length=100, blank=True, help_text="Judicial Assistant's room/office number")
+    # Law Clerks information
+    apprentices = models.TextField(blank=True, help_text="Names of law clerks, apprentices or interns (one per line)")
+    # Legacy field - kept for backwards compatibility
+    additional_staff = models.TextField(blank=True, help_text="Additional staff information (legacy field)")
     holiday_calendar = models.ForeignKey(HolidayCalendar, null=True, blank=True, on_delete=models.SET_NULL, related_name="assigned_judges")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "judges"
@@ -145,6 +296,8 @@ class JudgeAssociation(UUIDModel):
     primary_judge = models.ForeignKey(Judge, on_delete=models.CASCADE, related_name="associated_judges")
     associated_judge = models.ForeignKey(Judge, on_delete=models.CASCADE, related_name="primary_assignments")
     association_type = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "judge_associations"
@@ -169,6 +322,7 @@ class JudgeProcedure(UUIDModel):
     filing_cutoff_time = models.TimeField(null=True, blank=True)
     hearing_windows = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "judge_procedures"
@@ -187,6 +341,14 @@ class CaseStatus(models.TextChoices):
 
 
 class Case(UUIDModel):
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.PROTECT,
+        related_name="cases",
+        null=True,  # Temporarily nullable for migration
+        blank=True,
+        help_text="Organization this case belongs to"
+    )
     internal_case_id = models.CharField(max_length=64, unique=True)
     case_number = models.CharField(max_length=128, blank=True)
     caption = models.CharField(max_length=512)
@@ -207,6 +369,7 @@ class Case(UUIDModel):
         db_table = "cases"
         ordering = ["-filing_date", "caption"]
         indexes = [
+            models.Index(fields=["organization", "status"], name="idx_case_org_status"),
             models.Index(fields=["case_number"], name="idx_case_case_number"),
             models.Index(fields=["court", "status"], name="idx_case_court_status"),
         ]
@@ -219,6 +382,9 @@ class CaseRelationship(UUIDModel):
     from_case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="related_cases")
     to_case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="related_to")
     relation_type = models.CharField(max_length=64, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "case_relationships"
@@ -258,6 +424,14 @@ class ContactType(models.TextChoices):
 
 
 class Contact(UUIDModel):
+    organization = models.ForeignKey(
+        Organization,
+        on_delete=models.PROTECT,
+        related_name="contacts",
+        null=True,  # Temporarily nullable for migration
+        blank=True,
+        help_text="Organization this contact belongs to"
+    )
     type = models.CharField(max_length=20, choices=ContactType.choices)
     first_name = models.CharField(max_length=255, blank=True)
     last_name = models.CharField(max_length=255, blank=True)
@@ -269,9 +443,15 @@ class Contact(UUIDModel):
     preferred_contact_method = models.CharField(max_length=50, blank=True)
     availability = models.JSONField(null=True, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "contacts"
         ordering = ["org_name", "last_name", "first_name"]
+        indexes = [
+            models.Index(fields=["organization"], name="idx_contact_org"),
+        ]
 
     def __str__(self):
         if self.type == ContactType.ORGANIZATION:
@@ -284,6 +464,9 @@ class ContactAddress(UUIDModel):
     label = models.CharField(max_length=100)
     address = models.JSONField()
     is_primary = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "contact_addresses"
@@ -311,6 +494,9 @@ class CaseContact(UUIDModel):
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name="case_roles")
     role = models.CharField(max_length=32, choices=CaseContactRole.choices)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "case_contacts"
         constraints = [
@@ -324,6 +510,9 @@ class CaseContact(UUIDModel):
 class CaseTag(UUIDModel):
     name = models.CharField(max_length=64, unique=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "case_tags"
         ordering = ["name"]
@@ -335,6 +524,9 @@ class CaseTag(UUIDModel):
 class CaseTagAssignment(UUIDModel):
     case = models.ForeignKey(Case, on_delete=models.CASCADE, related_name="tag_assignments")
     tag = models.ForeignKey(CaseTag, on_delete=models.CASCADE, related_name="cases")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "case_tag_assignments"
@@ -369,6 +561,9 @@ class CasePermission(UUIDModel):
     can_edit = models.BooleanField(default=False)
     can_manage_deadlines = models.BooleanField(default=False)
     can_manage_filings = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "case_permissions"
@@ -425,6 +620,9 @@ class DocChunk(UUIDModel):
     embedding_id = models.UUIDField(null=True, blank=True)
     model_version = models.CharField(max_length=128, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "doc_chunks"
         constraints = [
@@ -454,6 +652,7 @@ class Rule(UUIDModel):
     text = models.TextField(blank=True)
     url = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "rules"
@@ -466,6 +665,9 @@ class Rule(UUIDModel):
 class RuleCrossRef(UUIDModel):
     from_rule = models.ForeignKey(Rule, on_delete=models.CASCADE, related_name="crossref_from")
     to_rule = models.ForeignKey(Rule, on_delete=models.CASCADE, related_name="crossref_to")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "rule_crossrefs"
@@ -557,6 +759,9 @@ class DeadlineDependency(UUIDModel):
     successor = models.ForeignKey(Deadline, on_delete=models.CASCADE, related_name="predecessor_links")
     dependency_type = models.CharField(max_length=32, blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "deadline_dependencies"
         constraints = [
@@ -575,6 +780,9 @@ class DocketEntry(UUIDModel):
     description = models.TextField(blank=True)
     ecf_link = models.URLField(blank=True)
     pdf_document = models.ForeignKey(Document, on_delete=models.SET_NULL, null=True, blank=True, related_name="docket_references")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "docket_entries"
@@ -602,6 +810,9 @@ class Filing(UUIDModel):
     notes = models.TextField(blank=True)
     primary_document = models.ForeignKey(Document, on_delete=models.SET_NULL, null=True, blank=True, related_name="primary_for_filings")
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "filings"
         ordering = ["-served_at"]
@@ -614,6 +825,9 @@ class FilingExhibit(UUIDModel):
     filing = models.ForeignKey(Filing, on_delete=models.CASCADE, related_name="exhibits")
     label = models.CharField(max_length=64)
     document = models.ForeignKey(Document, on_delete=models.SET_NULL, null=True, blank=True, related_name="exhibit_of")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "filing_exhibits"
@@ -628,6 +842,9 @@ class FilingExhibit(UUIDModel):
 class FilingServiceContact(UUIDModel):
     filing = models.ForeignKey(Filing, on_delete=models.CASCADE, related_name="service_contacts")
     contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name="service_filings")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "service_list"
@@ -649,6 +866,9 @@ class Hearing(UUIDModel):
     requirements = models.TextField(blank=True)
     outcome = models.TextField(blank=True)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = "hearings"
         indexes = [
@@ -663,6 +883,9 @@ class Hearing(UUIDModel):
 class HearingFollowUp(UUIDModel):
     hearing = models.ForeignKey(Hearing, on_delete=models.CASCADE, related_name="followups")
     deadline = models.ForeignKey(Deadline, on_delete=models.CASCADE, related_name="hearing_followups")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "hearing_followups"
@@ -738,6 +961,9 @@ class UserNotificationSubscription(UUIDModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notification_subscriptions")
     case = models.ForeignKey(Case, on_delete=models.CASCADE, null=True, blank=True, related_name="notification_subscriptions")
     type = models.CharField(max_length=32, choices=SubscriptionType.choices)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = "user_notification_subscriptions"
@@ -822,3 +1048,281 @@ class RetrievalRun(UUIDModel):
 
     def __str__(self):
         return f"Retrieval run for {self.case or 'global'}"
+
+
+# =============================================================================
+# Subscription Management Models
+# =============================================================================
+
+class SubscriptionStatus(models.TextChoices):
+    """Subscription status choices."""
+    ACTIVE = "active", "Active"
+    SUSPENDED = "suspended", "Suspended"
+    CANCELLED = "cancelled", "Cancelled"
+    TRIAL = "trial", "Trial"
+
+
+class BillingCycleType(models.TextChoices):
+    """Billing cycle type choices."""
+    MONTHLY = "monthly", "Monthly"
+    ANNIVERSARY = "anniversary", "Anniversary"
+    CUSTOM = "custom", "Custom"
+
+
+class Subscription(UUIDModel):
+    """
+    Subscription model to track licensing and pricing for each organization.
+    One subscription per organization.
+    """
+    organization = models.OneToOneField(
+        Organization,
+        on_delete=models.CASCADE,
+        related_name="subscription",
+        help_text="Organization this subscription belongs to"
+    )
+    licensed_users = models.PositiveIntegerField(
+        default=1,
+        help_text="Number of user licenses purchased"
+    )
+    monthly_rate = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Monthly rate in USD"
+    )
+    billing_cycle_type = models.CharField(
+        max_length=20,
+        choices=BillingCycleType.choices,
+        default=BillingCycleType.MONTHLY,
+        help_text="Type of billing cycle"
+    )
+    billing_day = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(31)],
+        help_text="Day of month for anniversary billing (1-31)"
+    )
+    contract_start_date = models.DateField(
+        help_text="Contract start date"
+    )
+    contract_end_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Contract end date (null for ongoing)"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=SubscriptionStatus.choices,
+        default=SubscriptionStatus.ACTIVE
+    )
+    notes = models.TextField(blank=True, help_text="Internal notes about subscription")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "subscriptions"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["organization", "status"], name="idx_sub_org_status"),
+        ]
+
+    def __str__(self):
+        return f"Subscription: {self.organization.name} ({self.licensed_users} users)"
+
+    def get_active_user_count(self):
+        """Get count of active users in the organization."""
+        return self.organization.users.filter(is_active=True).count()
+
+    def is_at_user_limit(self):
+        """Check if organization is at or over user limit."""
+        return self.get_active_user_count() >= self.licensed_users
+
+    def can_add_user(self):
+        """Check if organization can add another user."""
+        return not self.is_at_user_limit()
+
+
+class SubscriptionChangeType(models.TextChoices):
+    """Types of subscription changes to track."""
+    LICENSE_CHANGE = "license_change", "License Count Changed"
+    PRICE_CHANGE = "price_change", "Price Changed"
+    STATUS_CHANGE = "status_change", "Status Changed"
+    CYCLE_CHANGE = "cycle_change", "Billing Cycle Changed"
+    CONTRACT_CHANGE = "contract_change", "Contract Terms Changed"
+
+
+class SubscriptionHistory(UUIDModel):
+    """
+    Historical tracking of all subscription changes.
+    """
+    subscription = models.ForeignKey(
+        Subscription,
+        on_delete=models.CASCADE,
+        related_name="history",
+        help_text="Subscription being tracked"
+    )
+    change_type = models.CharField(
+        max_length=20,
+        choices=SubscriptionChangeType.choices,
+        help_text="Type of change"
+    )
+    old_value = models.TextField(
+        blank=True,
+        help_text="Previous value (JSON or string)"
+    )
+    new_value = models.TextField(
+        blank=True,
+        help_text="New value (JSON or string)"
+    )
+    changed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subscription_changes",
+        help_text="User who made the change"
+    )
+    reason = models.TextField(
+        blank=True,
+        help_text="Reason for the change"
+    )
+    effective_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date when change becomes effective"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "subscription_history"
+        ordering = ["-created_at"]
+        verbose_name_plural = "Subscription histories"
+        indexes = [
+            models.Index(fields=["subscription", "change_type"], name="idx_subhist_sub_type"),
+            models.Index(fields=["created_at"], name="idx_subhist_created"),
+        ]
+
+    def __str__(self):
+        return f"{self.subscription.organization.name} - {self.change_type} on {self.created_at.date()}"
+
+
+class PaymentStatus(models.TextChoices):
+    """Payment status choices."""
+    PENDING = "pending", "Pending"
+    PAID = "paid", "Paid"
+    OVERDUE = "overdue", "Overdue"
+    PARTIALLY_PAID = "partially_paid", "Partially Paid"
+    CLEARED = "cleared", "Cleared"
+    REFUNDED = "refunded", "Refunded"
+    PLACEHOLDER_1 = "placeholder_1", "Custom Status 1"
+    PLACEHOLDER_2 = "placeholder_2", "Custom Status 2"
+
+
+class BillingRecord(UUIDModel):
+    """
+    Monthly billing record for tracking invoices and payments.
+    """
+    subscription = models.ForeignKey(
+        Subscription,
+        on_delete=models.CASCADE,
+        related_name="billing_records",
+        help_text="Subscription being billed"
+    )
+    billing_period_start = models.DateField(
+        help_text="Start of billing period"
+    )
+    billing_period_end = models.DateField(
+        help_text="End of billing period"
+    )
+    amount_billed = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Total amount billed in USD"
+    )
+    amount_paid = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0,
+        help_text="Amount paid in USD"
+    )
+    balance_due = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Balance due in USD"
+    )
+    
+    # Date fields
+    invoice_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date invoice was generated"
+    )
+    payment_received_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date payment was received"
+    )
+    payment_due_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date payment is due"
+    )
+    payment_cleared_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date payment cleared"
+    )
+    reminder_sent_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Date reminder was sent"
+    )
+    custom_date_1 = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Custom date field 1"
+    )
+    custom_date_2 = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Custom date field 2"
+    )
+    custom_date_3 = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Custom date field 3"
+    )
+    
+    payment_status = models.CharField(
+        max_length=20,
+        choices=PaymentStatus.choices,
+        default=PaymentStatus.PENDING,
+        help_text="Current payment status"
+    )
+    invoice_number = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Invoice number or reference"
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Additional notes about this billing record"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "billing_records"
+        ordering = ["-billing_period_start"]
+        indexes = [
+            models.Index(fields=["subscription", "billing_period_start"], name="idx_bill_sub_period"),
+            models.Index(fields=["payment_status"], name="idx_bill_status"),
+            models.Index(fields=["payment_due_date"], name="idx_bill_due_date"),
+        ]
+
+    def __str__(self):
+        return f"{self.subscription.organization.name} - {self.billing_period_start} to {self.billing_period_end}"
+
+    def calculate_balance(self):
+        """Calculate and update balance due."""
+        self.balance_due = self.amount_billed - self.amount_paid
+        return self.balance_due

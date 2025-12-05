@@ -13,7 +13,7 @@ class UserCreationForm(forms.ModelForm):
 
     class Meta:
         model = models.User
-        fields = ("email", "full_name", "role", "firm", "timezone")
+        fields = ("email", "first_name", "last_name", "organization", "phone", "role", "timezone")
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1")
@@ -37,11 +37,14 @@ class UserChangeForm(forms.ModelForm):
         model = models.User
         fields = (
             "email",
-            "full_name",
+            "first_name",
+            "last_name",
+            "organization",
+            "phone",
             "role",
-            "firm",
             "timezone",
             "mfa_enabled",
+            "created_by",
             "password",
             "is_active",
             "is_staff",
@@ -59,13 +62,13 @@ class UserAdmin(BaseUserAdmin):
     add_form = UserCreationForm
     form = UserChangeForm
     model = models.User
-    list_display = ("email", "full_name", "role", "is_staff", "is_active")
-    list_filter = ("role", "is_staff", "is_active")
+    list_display = ("email", "first_name", "last_name", "organization", "role", "is_staff", "is_active")
+    list_filter = ("role", "organization", "is_staff", "is_active")
     ordering = ("email",)
-    search_fields = ("email", "full_name", "firm")
+    search_fields = ("email", "first_name", "last_name", "organization__name")
     fieldsets = (
         (None, {"fields": ("email", "password")}),
-        ("Profile", {"fields": ("full_name", "role", "firm", "timezone", "mfa_enabled", "deleted_at")}),
+        ("Profile", {"fields": ("first_name", "last_name", "organization", "phone", "role", "timezone", "mfa_enabled", "created_by", "deleted_at")}),
         (
             "Permissions",
             {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
@@ -77,7 +80,7 @@ class UserAdmin(BaseUserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "full_name", "role", "firm", "timezone", "password1", "password2"),
+                "fields": ("email", "first_name", "last_name", "organization", "phone", "role", "timezone", "password1", "password2"),
             },
         ),
     )
@@ -96,6 +99,35 @@ class JudgeAdmin(admin.ModelAdmin):
     list_display = ("full_name", "court", "courtroom")
     search_fields = ("full_name", "court__name")
     list_filter = ("court",)
+    
+    fieldsets = (
+        ("Judge Information", {
+            "fields": ("full_name", "court", "courtroom", "chambers_url", "holiday_calendar")
+        }),
+        ("Judge Contact", {
+            "fields": ("contact_email", "contact_phone")
+        }),
+        ("Court Reporter", {
+            "fields": ("court_reporter_name", "court_reporter_phone", "court_reporter_room"),
+            "classes": ("collapse",)
+        }),
+        ("Courtroom Deputy", {
+            "fields": ("clerk_name", "clerk_phone", "clerk_email", "clerk_room"),
+            "classes": ("collapse",)
+        }),
+        ("Executive Law Clerk", {
+            "fields": ("executive_law_clerk", "executive_law_clerk_phone", "executive_law_clerk_room"),
+            "classes": ("collapse",)
+        }),
+        ("Judicial Assistant", {
+            "fields": ("judicial_assistant", "judicial_assistant_phone", "judicial_assistant_room"),
+            "classes": ("collapse",)
+        }),
+        ("Law Clerks & Additional Staff", {
+            "fields": ("apprentices", "additional_staff"),
+            "classes": ("collapse",)
+        }),
+    )
 
 
 @admin.register(models.Case)
@@ -219,3 +251,92 @@ class PocChangeEventAdmin(admin.ModelAdmin):
     list_filter = ("entity_kind", "change_type")
     search_fields = ("entity_kind", "entity_id", "diff_text")
     ordering = ("-detected_at",)
+
+
+# =============================================================================
+# Subscription Management Admin
+# =============================================================================
+
+@admin.register(models.Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ("organization", "licensed_users", "monthly_rate", "status", "billing_cycle_type", "contract_start_date")
+    list_filter = ("status", "billing_cycle_type")
+    search_fields = ("organization__name", "notes")
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at", "updated_at")
+    
+    fieldsets = (
+        ("Organization", {
+            "fields": ("organization",)
+        }),
+        ("License & Pricing", {
+            "fields": ("licensed_users", "monthly_rate")
+        }),
+        ("Billing Details", {
+            "fields": ("billing_cycle_type", "billing_day", "contract_start_date", "contract_end_date")
+        }),
+        ("Status", {
+            "fields": ("status", "notes")
+        }),
+        ("Metadata", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",)
+        }),
+    )
+
+
+@admin.register(models.SubscriptionHistory)
+class SubscriptionHistoryAdmin(admin.ModelAdmin):
+    list_display = ("subscription", "change_type", "changed_by", "effective_date", "created_at")
+    list_filter = ("change_type", "effective_date")
+    search_fields = ("subscription__organization__name", "reason", "old_value", "new_value")
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at",)
+    
+    fieldsets = (
+        ("Subscription", {
+            "fields": ("subscription", "change_type")
+        }),
+        ("Change Details", {
+            "fields": ("old_value", "new_value", "reason", "effective_date")
+        }),
+        ("Metadata", {
+            "fields": ("changed_by", "created_at"),
+            "classes": ("collapse",)
+        }),
+    )
+
+
+@admin.register(models.BillingRecord)
+class BillingRecordAdmin(admin.ModelAdmin):
+    list_display = ("subscription", "billing_period_start", "billing_period_end", "amount_billed", "amount_paid", "balance_due", "payment_status")
+    list_filter = ("payment_status", "billing_period_start")
+    search_fields = ("subscription__organization__name", "invoice_number", "notes")
+    ordering = ("-billing_period_start",)
+    readonly_fields = ("created_at", "updated_at")
+    
+    fieldsets = (
+        ("Subscription", {
+            "fields": ("subscription",)
+        }),
+        ("Billing Period", {
+            "fields": ("billing_period_start", "billing_period_end")
+        }),
+        ("Financial Details", {
+            "fields": ("amount_billed", "amount_paid", "balance_due", "invoice_number")
+        }),
+        ("Dates", {
+            "fields": ("invoice_date", "payment_due_date", "payment_received_date", "payment_cleared_date", "reminder_sent_date")
+        }),
+        ("Custom Dates", {
+            "fields": ("custom_date_1", "custom_date_2", "custom_date_3"),
+            "classes": ("collapse",)
+        }),
+        ("Status & Notes", {
+            "fields": ("payment_status", "notes")
+        }),
+        ("Metadata", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",)
+        }),
+    )

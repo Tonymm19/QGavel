@@ -1,40 +1,75 @@
+version: "3.9"
+
+# QGavel Production Docker Compose
+# ================================
+# This file is used for production deployment on EC2
+# It connects to RDS PostgreSQL (not local postgres)
+
 services:
+  # Django Backend API
   backend:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
-    env_file:
-      - .env.production
-    depends_on:
-      - postgres
-      - redis
+    container_name: qgavel-backend
+    restart: always
     ports:
       - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.production
+      # Redis uses container name
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - qgavel-network
 
+  # React Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      target: production
+    container_name: qgavel-frontend
+    restart: always
     ports:
       - "3000:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - qgavel-network
 
-  postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
+  # Redis for caching and sessions
   redis:
     image: redis:7-alpine
+    container_name: qgavel-redis
+    restart: always
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - qgavel-network
+
+networks:
+  qgavel-network:
+    driver: bridge
 
 volumes:
-  postgres_data:
   redis_data:

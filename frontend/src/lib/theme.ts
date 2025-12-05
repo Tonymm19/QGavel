@@ -111,6 +111,8 @@ export const componentClasses = {
     blue: 'w-12 h-12 rounded-xl flex items-center justify-center bg-blue-600 text-white',
     red: 'w-12 h-12 rounded-xl flex items-center justify-center bg-red-600 text-white',
     slate: 'w-12 h-12 rounded-xl flex items-center justify-center bg-slate-600 text-white',
+    indigo: 'w-12 h-12 rounded-xl flex items-center justify-center bg-indigo-600 text-white',
+    green: 'w-12 h-12 rounded-xl flex items-center justify-center bg-green-600 text-white',
   },
 
   // Stat Cards
@@ -202,7 +204,7 @@ export function getStatusBadgeClass(status: string, type: 'deadline' | 'priority
 /**
  * Helper function to get icon container class by color
  */
-export function getIconContainerClass(color: 'emerald' | 'amber' | 'blue' | 'red' | 'slate'): string {
+export function getIconContainerClass(color: 'emerald' | 'amber' | 'blue' | 'red' | 'slate' | 'indigo' | 'green'): string {
   return componentClasses.iconContainer[color];
 }
 

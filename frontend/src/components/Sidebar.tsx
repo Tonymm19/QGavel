@@ -9,16 +9,21 @@ import {
   AlertTriangle,
   Clock,
   Gavel,
-  Scale
+  Scale,
+  ShieldCheck,
+  CreditCard
 } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   isOpen: boolean;
+  userRole?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen, userRole }) => {
+  const isAdmin = userRole === 'super_admin' || userRole === 'firm_admin';
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'deadlines', label: 'Deadlines', icon: Clock },
@@ -31,6 +36,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, isOpen }) => 
   ];
 
   const secondaryItems = [
+    ...(isAdmin ? [{ id: 'admin', label: 'Admin Panel', icon: ShieldCheck }] : []),
+    ...(userRole === 'super_admin' ? [{ id: 'billing', label: 'Billing', icon: CreditCard }] : []),
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 
 import { useAuth } from '../contexts/AuthContext';
-
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8000/api/v1';
+import { API_BASE_URL } from '../config/api';
 
 export const useApi = () => {
   const { token, logout } = useAuth();

@@ -282,7 +282,7 @@ const NewDeadlineModal: React.FC<NewDeadlineModalProps> = ({ isOpen, onClose, ca
                 }
                 className={componentClasses.input.base}
               />
-              <p className={`text-xs mt-1 ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+              <p className="text-xs mt-1 text-gray-500">
                 Leave blank to create without snoozing.
               </p>
             </div>
