@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone as dt_timezone
 from typing import Iterable, Optional
 
 from django.utils import timezone
 
 from court_rules.models import Deadline
 
-from datetime import timezone as dt_timezone
 
 def _format_dt(dt) -> str:
     """
@@ -19,7 +19,7 @@ def _format_dt(dt) -> str:
         raise ValueError("Cannot format empty datetime for ICS export")
 
     if not hasattr(dt, "hour"):  # plain date
-        dt = timezone.datetime(
+        dt = datetime(
             year=dt.year, month=dt.month, day=dt.day, tzinfo=timezone.get_current_timezone()
         )
 

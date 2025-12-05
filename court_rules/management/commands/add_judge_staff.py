@@ -143,6 +143,9 @@ class Command(BaseCommand):
                 judge.clerk_name = deputy_name
                 judge.clerk_phone = deputy_phone
                 judge.clerk_room = deputy_room
+                judge.court_reporter_name = reporter_name
+                judge.court_reporter_phone = reporter_phone
+                judge.court_reporter_room = reporter_room
                 judge.executive_law_clerk = executive_clerk
                 judge.judicial_assistant = judicial_asst
                 judge.apprentices = '\n'.join(law_clerks) if law_clerks else ''
@@ -189,4 +192,3 @@ class Command(BaseCommand):
                 self.stdout.write(f'    - {judge.full_name}')
         
         self.stdout.write('=' * 70)
-
