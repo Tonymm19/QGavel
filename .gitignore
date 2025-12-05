@@ -16,6 +16,9 @@ migrate_to_rds.py
 create_superuser_rds.py
 load_data_rds.py
 seed_*_rds.py
+*_rds.py
+import_*_to_rds.py
+run_migrations_rds.py
 
 # Environment Files (API keys, secrets, passwords)
 .env
