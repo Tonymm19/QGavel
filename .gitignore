@@ -24,6 +24,7 @@ run_migrations_rds.py
 .env
 .env.*
 !.env.example
+!.env.production.example
 env.local
 .envrc
 
@@ -99,7 +100,7 @@ yarn-error.log*
 # =============================================================================
 
 # VSCode
-.vscode/
+# .vscode/  # Keep this - has useful project settings
 *.code-workspace
 
 # PyCharm
@@ -163,7 +164,6 @@ htmlcov/
 # Backup files
 *.bak
 *.backup
-*~
 
 # =============================================================================
 # Documentation (Private/Draft)
@@ -188,6 +188,8 @@ notes/
 ssl/
 certs/
 
+# But allow the aws-deployment folder's pem file to be ignored (already covered above)
+
 # =============================================================================
 # Logs and Monitoring
 # =============================================================================
@@ -195,4 +197,3 @@ certs/
 logs/
 *.log
 log/
-

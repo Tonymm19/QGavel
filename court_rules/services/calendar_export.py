@@ -9,7 +9,6 @@ from django.utils import timezone
 
 from court_rules.models import Deadline
 
-
 def _format_dt(dt) -> str:
     """
     Format a datetime or date in UTC as an iCalendar datetime (YYYYMMDDTHHMMSSZ).

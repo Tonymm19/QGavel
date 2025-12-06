@@ -567,3 +567,4 @@ Cost:
 **Congratulations!** Your foundation is solid. Week 2 is when we make it come alive!
 
 
+

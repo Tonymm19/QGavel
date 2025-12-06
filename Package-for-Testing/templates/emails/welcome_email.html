@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Precedentum</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #334155;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .header p {
+            color: #d1fae5;
+            margin: 8px 0 0 0;
+            font-size: 14px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #1e293b;
+            font-size: 24px;
+            margin: 0 0 16px 0;
+        }
+        .content p {
+            color: #64748b;
+            margin: 0 0 20px 0;
+            font-size: 16px;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+        }
+        .credentials-box {
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 24px 0;
+        }
+        .credentials-box p {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+        .credentials-box strong {
+            color: #1e293b;
+        }
+        .features {
+            margin: 30px 0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: start;
+            margin: 16px 0;
+        }
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background-color: #d1fae5;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 24px 30px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer p {
+            color: #94a3b8;
+            font-size: 14px;
+            margin: 4px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Precedentum!</h1>
+            <p>Your Court Compliance Platform</p>
+        </div>
+        
+        <div class="content">
+            <h2>Hello {{ user.first_name }}! 👋</h2>
+            <p>Your account has been created successfully. Welcome to Precedentum, your comprehensive federal court compliance platform.</p>
+            
+            <div class="credentials-box">
+                <p><strong>Your Account Details:</strong></p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Name:</strong> {{ user.full_name }}</p>
+                <p><strong>Organization:</strong> {{ user.organization.name }}</p>
+                <p><strong>Role:</strong> {{ role_display }}</p>
+            </div>
+            
+            <p>Your temporary password has been provided separately by your administrator. Please change it after your first login for security.</p>
+            
+            <center>
+                <a href="{{ login_url }}" class="button">Log In Now</a>
+            </center>
+            
+            <div class="features">
+                <h3 style="color: #1e293b; font-size: 20px; margin-bottom: 16px;">What you can do:</h3>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div>
+                        <strong style="color: #1e293b;">Track Deadlines</strong>
+                        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Manage court deadlines with automated calculations and reminders</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div>
+                        <strong style="color: #1e293b;">Search Court Rules</strong>
+                        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Access federal and local court rules instantly</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div>
+                        <strong style="color: #1e293b;">Judge Procedures</strong>
+                        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">View judge-specific requirements and preferences</p>
+                    </div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div>
+                        <strong style="color: #1e293b;">Case Management</strong>
+                        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 14px;">Organize and track all your cases in one place</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p>If you have any questions or need assistance, please contact your administrator or reach out to our support team.</p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Precedentum</strong> - Federal Court Compliance Platform</p>
+            <p>Created by {{ created_by_name }}</p>
+            <p>This is an automated message. Please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>
+
+
+
